@@ -1,6 +1,11 @@
 {
     "site_name": "FancyYou",
     "base_url": "https://fancyyou.com.ar",
+    "categories_config": {
+        "selector": "nav.nav-categories a",
+        "attribute": "href",
+        "base_path": "/categoria/"
+    },
     "urls": [
       "https://fancyyou.com.ar/categoria/pestanas",
       "https://fancyyou.com.ar/categoria/unas"
