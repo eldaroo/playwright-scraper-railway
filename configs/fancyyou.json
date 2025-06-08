@@ -1,16 +1,9 @@
 {
     "site_name": "FancyYou",
     "base_url": "https://fancyyou.com.ar",
-    "use_predefined_urls": true,
-    "urls": [
-        "https://fancyyou.com.ar/categoria/pestanas",
-        "https://fancyyou.com.ar/categoria/unas",
-        "https://fancyyou.com.ar/categoria/maquillaje",
-        "https://fancyyou.com.ar/categoria/skincare",
-        "https://fancyyou.com.ar/categoria/accesorios"
-    ],
+    "use_predefined_urls": false,
     "categories_config": {
-        "selector": "nav.nav-categories a",
+        "selector": ".category-tree__link a:not(.category-tree__toggle)",
         "attribute": "href",
         "base_path": "/categoria/"
     },
@@ -45,7 +38,7 @@
               "name": "price",
               "selector": ".product-price span.price",
               "type": "text",
-              "transform": "return data.replace(/[^\\d,\\.]/g, '').trim();"
+              "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
             },
             {
               "name": "image_primary",
@@ -76,4 +69,4 @@
     "cache_mode": "bypass",
     "semaphore_count": 2,
     "verbose": true
-  }
+}

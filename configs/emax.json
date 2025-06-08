@@ -1,13 +1,14 @@
 {
-  "site_name": "E-Max Store",
+  "site_name": "E-max Store",
   "base_url": "https://e-max-store.com",
+  "use_predefined_urls": false,
   "categories_config": {
-    "selector": ".menu-item a",
+    "selector": ".menu-item-type-post_type.menu-item-object-page > a",
     "attribute": "href",
-    "base_path": "/categoria/"
+    "base_path": "e-max-store.com"
   },
   "crawler_params": {
-    "headless": false,
+    "headless": true,
     "defaultViewport": { "width": 1280, "height": 800 },
     "args": [
       "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
@@ -37,7 +38,7 @@
     "type": "json_css",
     "params": {
       "schema": {
-        "name": "E-Max Store - Productos",
+        "name": "E-max Store",
         "baseSelector": "ul.products li.product",
         "fields": [
           {
@@ -47,9 +48,9 @@
           },
           {
             "name": "price",
-            "selector": "span.price",
+            "selector": "span.price ins .amount, span.price > .amount",
             "type": "text",
-            "transform": "return data.replace(/[^\\d,\\.]/g, '').trim();"
+            "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
           },
           {
             "name": "image",
