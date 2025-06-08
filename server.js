@@ -152,8 +152,7 @@ app.post('/scrape', async (req, res) => {
       console.log(`[SCRAPER] Processing site: ${siteConfig.site_name}`);
       
       const browser = await chromium.launch({
-        headless: siteConfig.crawler_params.headless,
-        args: siteConfig.crawler_params.args
+        headless: true
       });
 
       // Crear un contexto compartido para mantener la sesión
