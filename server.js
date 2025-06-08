@@ -139,12 +139,30 @@ async function scrapeUrl(browser, url, siteConfig, context) {
 
 app.post('/scrape', async (req, res) => {
   try {
-    const siteConfigs = req.body.sites ? 
-      Object.fromEntries(
-        Object.entries(loadSiteConfigs())
-          .filter(([key]) => req.body.sites.includes(key))
-      ) : 
-      loadSiteConfigs();
+    // Validar el formato del request body
+    if (!req.body.sites || !Array.isArray(req.body.sites)) {
+      return res.status(400).json({
+        success: false,
+        error: 'El campo "sites" es requerido y debe ser un array',
+        example: {
+          sites: ["fancyyou"]
+        }
+      });
+    }
+
+    const siteConfigs = Object.fromEntries(
+      Object.entries(loadSiteConfigs())
+        .filter(([key]) => req.body.sites.includes(key))
+    );
+
+    // Validar que los sitios solicitados existan
+    if (Object.keys(siteConfigs).length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Ninguno de los sitios solicitados existe',
+        available_sites: Object.keys(loadSiteConfigs())
+      });
+    }
 
     const results = {};
 
