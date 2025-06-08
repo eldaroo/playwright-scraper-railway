@@ -66,8 +66,16 @@ async function discoverCategories(browser, siteConfig) {
     await performLogin(page, siteConfig.auth_config);
   }
 
-  await page.goto(siteConfig.base_url);
-
+  try {
+    await page.goto(siteConfig.base_url, {
+      waitUntil: 'domcontentloaded',
+      timeout: 60000
+    });
+  } catch (error) {
+    console.error(`[GOTO ERROR] Could not load ${siteConfig.base_url}`);
+    throw error;
+  }
+  
   const categories = await page.$$eval(
     siteConfig.categories_config.selector,
     (elements, config) => elements
@@ -184,7 +192,8 @@ app.post('/scrape', async (req, res) => {
       }
 
       // Descubrir categorías si no se proporcionan URLs específicas
-      const urls = req.body.urls?.[siteName] || await discoverCategories(browser, siteConfig);
+      const urls = req.body.urls?.[siteName] || 
+        (siteConfig.use_predefined_urls ? siteConfig.urls : await discoverCategories(browser, siteConfig));
       console.log(`[SCRAPER] Found ${urls.length} URLs for ${siteConfig.site_name}`);
 
       const allProducts = [];

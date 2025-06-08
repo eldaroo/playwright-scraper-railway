@@ -1,15 +1,19 @@
 {
     "site_name": "FancyYou",
     "base_url": "https://fancyyou.com.ar",
+    "use_predefined_urls": true,
+    "urls": [
+        "https://fancyyou.com.ar/categoria/pestanas",
+        "https://fancyyou.com.ar/categoria/unas",
+        "https://fancyyou.com.ar/categoria/maquillaje",
+        "https://fancyyou.com.ar/categoria/skincare",
+        "https://fancyyou.com.ar/categoria/accesorios"
+    ],
     "categories_config": {
         "selector": "nav.nav-categories a",
         "attribute": "href",
         "base_path": "/categoria/"
     },
-    "urls": [
-      "https://fancyyou.com.ar/categoria/pestanas",
-      "https://fancyyou.com.ar/categoria/unas"
-    ],
     "crawler_params": {
       "headless": true,
       "defaultViewport": { "width": 1280, "height": 800 },
