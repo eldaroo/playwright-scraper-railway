@@ -1,0 +1,54 @@
+{
+  "site_name": "FancyYou Test",
+  "base_url": "https://fancyyou.com.ar",
+  "use_predefined_urls": true,
+  "urls": [
+    "https://fancyyou.com.ar/categoria/nuevos-ingresos"
+  ],
+  "crawler_params": {
+    "headless": true,
+    "defaultViewport": { "width": 1280, "height": 800 },
+    "args": [
+      "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+    ]
+  },
+  "pre_actions": [
+    { "type": "waitForSelector", "selector": "div.product-list__item", "timeout": 15000 }
+  ],
+  "extraction_config": {
+    "type": "json_css",
+    "params": {
+      "schema": {
+        "name": "FancyYou - Test",
+        "baseSelector": "div.product-list__item",
+        "fields": [
+          {
+            "name": "title",
+            "selector": ".product-list__item-name",
+            "type": "text"
+          },
+          {
+            "name": "price",
+            "selector": ".product-price span.price",
+            "type": "text",
+            "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
+          },
+          {
+            "name": "image",
+            "selector": ".product-list__item-image img",
+            "type": "attribute",
+            "attribute": "src"
+          },
+          {
+            "name": "link",
+            "selector": ".product-list__item-link",
+            "type": "attribute",
+            "attribute": "href"
+          }
+        ]
+      },
+      "verbose": true
+    }
+  },
+  "semaphore_count": 2
+} 

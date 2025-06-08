@@ -1,0 +1,55 @@
+{
+  "site_name": "Laura Mayorista Test",
+  "base_url": "https://www.lauramayorista.com",
+  "use_predefined_urls": true,
+  "urls": [
+    "https://www.lauramayorista.com/insumos-de-unas"
+  ],
+  "crawler_params": {
+    "headless": true,
+    "defaultViewport": { "width": 1280, "height": 800 },
+    "args": [
+      "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+    ]
+  },
+  "pre_actions": [
+    { "type": "waitForSelector", "selector": "section[data-hook='product-list']", "timeout": 60000 },
+    { "type": "waitForSelector", "selector": "ul[data-hook='product-list-wrapper']", "timeout": 60000 }
+  ],
+  "extraction_config": {
+    "type": "json_css",
+    "params": {
+      "schema": {
+        "name": "Laura Mayorista - Test",
+        "baseSelector": "li[data-hook='product-list-grid-item']",
+        "fields": [
+          {
+            "name": "title",
+            "selector": "[data-hook='product-item-name']",
+            "type": "text"
+          },
+          {
+            "name": "price",
+            "selector": "span[data-hook='product-item-price-to-pay']",
+            "type": "text",
+            "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
+          },
+          {
+            "name": "image",
+            "selector": "[data-hook='product-item-image'] img",
+            "type": "attribute",
+            "attribute": "src"
+          },
+          {
+            "name": "link",
+            "selector": "[data-hook='product-item-container']",
+            "type": "attribute",
+            "attribute": "href"
+          }
+        ]
+      },
+      "verbose": true
+    }
+  },
+  "semaphore_count": 2
+} 
