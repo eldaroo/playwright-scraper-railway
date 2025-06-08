@@ -1,0 +1,54 @@
+{
+  "site_name": "Laura Mayorista",
+  "base_url": "https://www.lauramayorista.com",
+  "categories_config": {
+    "selector": "nav.category-navigation a",
+    "attribute": "href"
+  },
+  "crawler_params": {
+    "headless": true,
+    "defaultViewport": { "width": 1280, "height": 800 },
+    "args": [
+      "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+    ]
+  },
+  "pre_actions": [
+    { "type": "waitForSelector", "selector": "li[data-hook='product-list-grid-item']", "timeout": 15000 }
+  ],
+  "extraction_config": {
+    "type": "json_css",
+    "params": {
+      "schema": {
+        "name": "Laura Mayorista - Productos",
+        "baseSelector": "li[data-hook='product-list-grid-item']",
+        "fields": [
+          {
+            "name": "title",
+            "selector": "p[data-hook='product-item-name']",
+            "type": "text"
+          },
+          {
+            "name": "price",
+            "selector": "[data-hook='product-item-price-to-pay']",
+            "type": "text",
+            "transform": "return data.replace(/[^\\d,\\.]/g, '').trim();"
+          },
+          {
+            "name": "url",
+            "selector": "a[data-hook='product-item-product-details-link']",
+            "type": "attribute",
+            "attribute": "href"
+          },
+          {
+            "name": "image",
+            "selector": "wow-image img",
+            "type": "attribute",
+            "attribute": "src"
+          }
+        ]
+      },
+      "verbose": true
+    }
+  },
+  "semaphore_count": 2
+} 

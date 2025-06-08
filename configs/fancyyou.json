@@ -1,0 +1,69 @@
+{
+  "site_name": "FancyYou",
+  "base_url": "https://fancyyou.com.ar",
+  "categories_config": {
+    "selector": "nav.nav-categories a",
+    "attribute": "href",
+    "base_path": "/categoria/"
+  },
+  "crawler_params": {
+    "headless": true,
+    "defaultViewport": { "width": 1280, "height": 800 },
+    "args": [
+      "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+    ]
+  },
+  "pre_actions": [
+    { "type": "waitForSelector", "selector": "div.product-list__item", "timeout": 15000 }
+  ],
+  "extraction_config": {
+    "type": "json_css",
+    "params": {
+      "schema": {
+        "name": "FancyYou - Productos",
+        "baseSelector": "div.product-list__item",
+        "fields": [
+          {
+            "name": "title",
+            "selector": "h3 a",
+            "type": "text"
+          },
+          {
+            "name": "sku",
+            "selector": "small.sku",
+            "type": "text"
+          },
+          {
+            "name": "price",
+            "selector": ".product-price span.price",
+            "type": "text",
+            "transform": "return data.replace(/[^\\d,\\.]/g, '').trim();"
+          },
+          {
+            "name": "image_primary",
+            "selector": "div.aspect-ratio-image-product img[src*='/0?']",
+            "type": "attribute",
+            "attribute": "src",
+            "transform": "return 'https://fancyyou.com.ar' + data;"
+          },
+          {
+            "name": "image_secondary",
+            "selector": "div.aspect-ratio-image-product img[src*='/1?']",
+            "type": "attribute",
+            "attribute": "src",
+            "transform": "return 'https://fancyyou.com.ar' + data;"
+          },
+          {
+            "name": "category",
+            "selector": "div.single-product",
+            "type": "attribute",
+            "attribute": "data-mkt-item-list-name",
+            "transform": "return data.replace('Catálogo | Category: ', '').trim();"
+          }
+        ]
+      },
+      "verbose": true
+    }
+  },
+  "semaphore_count": 2
+} 
