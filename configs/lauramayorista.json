@@ -1,12 +1,15 @@
 {
   "site_name": "Laura Mayorista",
   "base_url": "https://www.lauramayorista.com",
-  "use_predefined_urls": false,
-  "categories_config": {
-    "selector": "a[data-testid='linkElement'][href*='lauramayorista.com']",
-    "attribute": "href",
-    "base_path": "www.lauramayorista.com"
-  },
+  "use_predefined_urls": true,
+  "urls": [
+    "https://www.lauramayorista.com/accesorios-para-mascotas",
+    "https://www.lauramayorista.com/shop",
+    "https://www.lauramayorista.com/ofertas",
+    "https://www.lauramayorista.com/electronica",
+    "https://www.lauramayorista.com/cuidado-facial",
+    "https://www.lauramayorista.com/contacto"
+  ],
   "crawler_params": {
     "headless": true,
     "defaultViewport": { "width": 1280, "height": 800 },
@@ -26,7 +29,7 @@
     "type": "json_css",
     "params": {
       "schema": {
-        "name": "Laura Mayorista - Productos",
+        "name": "Laura Mayorista",
         "baseSelector": "li[data-hook='product-list-grid-item']",
         "fields": [
           {
@@ -63,6 +66,19 @@
             "type": "url_extract",
             "pattern": "https://www\\.lauramayorista\\.com/([^?#/]+)(?:/[^?#]*)?",
             "transform": "return decodeURIComponent(data).replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');"
+          },
+          {
+            "name": "source_url",
+            "type": "url"
+          },
+          {
+            "name": "scraped_at",
+            "type": "timestamp"
+          },
+          {
+            "name": "site_name",
+            "type": "constant",
+            "value": "Laura Mayorista"
           }
         ]
       },
