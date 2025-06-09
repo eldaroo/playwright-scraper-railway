@@ -3,7 +3,7 @@
   "base_url": "https://fancyyou.com.ar",
   "use_predefined_urls": true,
   "urls": [
-    "https://fancyyou.com.ar/s/?q=combo"
+    "https://fancyyou.com.ar/categoria/porta-sube"
   ],
   "crawler_params": {
     "headless": true,
@@ -57,12 +57,12 @@
             "selector": "div.single-product",
             "type": "attribute",
             "attribute": "data-mkt-item-list-name",
-            "transform": "return data ? data.replace('Catálogo | Category: ', '').trim() : 'COMBOS';"
+            "transform": "return data ? data.replace('Catálogo | Category: ', '').trim() : 'PORTA SUBE';"
           },
           {
             "name": "source_url",
             "type": "constant",
-            "value": "https://fancyyou.com.ar/s/?q=combo"
+            "value": "https://fancyyou.com.ar/categoria/porta-sube"
           },
           {
             "name": "scraped_at",
