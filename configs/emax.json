@@ -66,11 +66,20 @@
           },
           {
             "name": "sku",
-            "selector": "a.button.product_type_simple.add_to_cart_button.ajax_add_to_cart",
-            "type": "attribute",
-            "attribute": "data-product-id",
+            "selector": "li.product",
+            "type": "nested",
             "debug": true,
-            "log_element": true
+            "log_element": true,
+            "fields": [
+              {
+                "name": "sku",
+                "selector": ".add_to_cart_button",
+                "type": "attribute",
+                "attribute": "data-product-id",
+                "debug": true,
+                "log_element": true
+              }
+            ]
           },
           {
             "name": "category",
