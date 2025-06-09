@@ -1,5 +1,5 @@
 {
-  "site_name": "FancyYou Test",
+  "site_name": "FancyYou",
   "base_url": "https://fancyyou.com.ar",
   "use_predefined_urls": true,
   "urls": [
@@ -19,12 +19,17 @@
     "type": "json_css",
     "params": {
       "schema": {
-        "name": "FancyYou - Test",
+        "name": "FancyYou - Categorías múltiples",
         "baseSelector": "div.product-list__item",
         "fields": [
           {
             "name": "title",
-            "selector": ".product-list__item-name",
+            "selector": "h3 a",
+            "type": "text"
+          },
+          {
+            "name": "sku",
+            "selector": "small.sku",
             "type": "text"
           },
           {
@@ -34,21 +39,32 @@
             "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
           },
           {
-            "name": "image",
-            "selector": ".product-list__item-image img",
+            "name": "image_primary",
+            "selector": "div.aspect-ratio-image-product img[src*='/0?']",
             "type": "attribute",
-            "attribute": "src"
+            "attribute": "src",
+            "transform": "return 'https://fancyyou.com.ar' + data;"
           },
           {
-            "name": "link",
-            "selector": ".product-list__item-link",
+            "name": "image_secondary",
+            "selector": "div.aspect-ratio-image-product img[src*='/1?']",
             "type": "attribute",
-            "attribute": "href"
+            "attribute": "src",
+            "transform": "return 'https://fancyyou.com.ar' + data;"
+          },
+          {
+            "name": "category",
+            "selector": "div.single-product",
+            "type": "attribute",
+            "attribute": "data-mkt-item-list-name",
+            "transform": "return data.replace('Catálogo | Category: ', '').trim();"
           }
         ]
       },
       "verbose": true
     }
   },
-  "semaphore_count": 2
+  "cache_mode": "bypass",
+  "semaphore_count": 2,
+  "verbose": true
 } 

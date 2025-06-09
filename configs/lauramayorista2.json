@@ -1,5 +1,5 @@
 {
-  "site_name": "Laura Mayorista Test",
+  "site_name": "Laura Mayorista",
   "base_url": "https://www.lauramayorista.com",
   "use_predefined_urls": true,
   "urls": [
@@ -20,12 +20,12 @@
     "type": "json_css",
     "params": {
       "schema": {
-        "name": "Laura Mayorista - Test",
+        "name": "Laura Mayorista - Productos",
         "baseSelector": "li[data-hook='product-list-grid-item']",
         "fields": [
           {
             "name": "title",
-            "selector": "[data-hook='product-item-name']",
+            "selector": "h3[data-hook='product-item-name']",
             "type": "text"
           },
           {
@@ -35,16 +35,28 @@
             "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
           },
           {
+            "name": "url",
+            "selector": "a[data-hook='product-item-product-details-link']",
+            "type": "attribute",
+            "attribute": "href"
+          },
+          {
             "name": "image",
-            "selector": "[data-hook='product-item-image'] img",
+            "selector": "wow-image img",
             "type": "attribute",
             "attribute": "src"
           },
           {
-            "name": "link",
-            "selector": "[data-hook='product-item-container']",
-            "type": "attribute",
-            "attribute": "href"
+            "name": "status",
+            "selector": "button[data-hook='product-item-add-to-cart-button']",
+            "type": "text",
+            "transform": "return data === 'Agotado' ? 'out_of_stock' : 'in_stock';"
+          },
+          {
+            "name": "category",
+            "type": "url_extract",
+            "pattern": "https://www\\.lauramayorista\\.com/([^?#]+)",
+            "transform": "return decodeURIComponent(data).split('/').pop().replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');"
           }
         ]
       },
