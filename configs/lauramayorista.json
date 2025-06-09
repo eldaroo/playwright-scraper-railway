@@ -15,8 +15,9 @@
     ]
   },
   "pre_actions": [
-    { "type": "waitForSelector", "selector": "section[data-hook='product-list']", "timeout": 60000 },
-    { "type": "waitForSelector", "selector": "ul[data-hook='product-list-wrapper']", "timeout": 60000 }
+    { "type": "waitForLoadState", "state": "networkidle", "timeout": 120000 },
+    { "type": "waitForSelector", "selector": "section[data-hook='product-list']", "timeout": 120000 },
+    { "type": "waitForSelector", "selector": "ul[data-hook='product-list-wrapper']", "timeout": 120000 }
   ],
   "extraction_config": {
     "type": "json_css",
@@ -57,8 +58,8 @@
           {
             "name": "category",
             "type": "url_extract",
-            "pattern": "https://www\\.lauramayorista\\.com/([^?#]+)",
-            "transform": "return decodeURIComponent(data).split('/').pop().replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');"
+            "pattern": "https://www\\.lauramayorista\\.com/([^?#/]+)(?:/[^?#]*)?",
+            "transform": "return decodeURIComponent(data).replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');"
           }
         ]
       },
