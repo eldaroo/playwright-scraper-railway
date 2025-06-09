@@ -66,12 +66,11 @@
           },
           {
             "name": "sku",
-            "selector": "li.product",
+            "selector": "a.button.product_type_simple.add_to_cart_button.ajax_add_to_cart",
             "type": "attribute",
             "attribute": "data-product-id",
             "debug": true,
-            "log_element": true,
-            "save_html": true
+            "log_element": true
           },
           {
             "name": "category",
