@@ -11,10 +11,13 @@
     "headless": true,
     "defaultViewport": { "width": 1280, "height": 800 },
     "args": [
-      "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+      "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+      "--disable-dev-shm-usage",
+      "--no-sandbox"
     ]
   },
   "pre_actions": [
+    { "type": "waitForLoadState", "state": "domcontentloaded", "timeout": 120000 },
     { "type": "waitForLoadState", "state": "networkidle", "timeout": 120000 },
     { "type": "waitForSelector", "selector": "section[data-hook='product-list']", "timeout": 120000 },
     { "type": "waitForSelector", "selector": "ul[data-hook='product-list-wrapper']", "timeout": 120000 }
