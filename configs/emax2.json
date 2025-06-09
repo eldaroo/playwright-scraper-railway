@@ -64,9 +64,9 @@
           },
           {
             "name": "sku",
-            "selector": ".add_to_cart_button",
+            "selector": "li.product",
             "type": "attribute",
-            "attribute": "data-product-sku",
+            "attribute": "data-product-id",
             "debug": true,
             "log_element": true,
             "save_html": true
