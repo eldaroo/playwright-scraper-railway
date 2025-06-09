@@ -58,7 +58,7 @@
         "fields": [
           {
             "name": "title",
-            "selector": "h3[data-hook='product-item-name']",
+            "selector": "h3[data-hook='product-item-name'], p[data-hook='product-item-name']",
             "type": "text"
           },
           {
