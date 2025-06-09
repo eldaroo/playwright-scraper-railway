@@ -8,19 +8,31 @@
     "base_path": "www.lauramayorista.com",
     "exclude_patterns": [
       "/shop$",
-      "/carrito$",
-      "/checkout$",
+      "/carrito",
+      "/checkout",
       "/$",
       "/my-account",
       "/account",
       "/contacto",
-      "/información"
+      "/información",
+      "/ubicación",
+      "/ofertas",
+      "/nosotros",
+      "/politicas",
+      "/terminos",
+      "/cuenta",
+      "/login",
+      "/register",
+      "/password",
+      "/search"
     ],
     "initial_actions": [
       { "type": "waitForLoadState", "state": "domcontentloaded" },
       { "type": "waitForLoadState", "state": "networkidle" }
     ],
-    "validate_url": "section[data-hook='product-list']"
+    "validate_url": "section[data-hook='product-list']",
+    "validation_timeout": 30000,
+    "continue_on_validation_error": true
   },
   "crawler_params": {
     "headless": true,
@@ -32,10 +44,10 @@
     ]
   },
   "pre_actions": [
-    { "type": "waitForLoadState", "state": "domcontentloaded", "timeout": 120000 },
-    { "type": "waitForLoadState", "state": "networkidle", "timeout": 120000 },
-    { "type": "waitForSelector", "selector": "section[data-hook='product-list']", "timeout": 120000 },
-    { "type": "waitForSelector", "selector": "ul[data-hook='product-list-wrapper']", "timeout": 120000 }
+    { "type": "waitForLoadState", "state": "domcontentloaded", "timeout": 30000 },
+    { "type": "waitForLoadState", "state": "networkidle", "timeout": 30000 },
+    { "type": "waitForSelector", "selector": "section[data-hook='product-list']", "timeout": 30000 },
+    { "type": "waitForSelector", "selector": "ul[data-hook='product-list-wrapper']", "timeout": 30000 }
   ],
   "extraction_config": {
     "type": "json_css",
