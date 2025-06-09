@@ -61,6 +61,20 @@
             "selector": "a.woocommerce-LoopProduct-link",
             "type": "attribute",
             "attribute": "href"
+          },
+          {
+            "name": "source_url",
+            "type": "constant",
+            "value": "https://e-max-store.com/calculadora/"
+          },
+          {
+            "name": "scraped_at",
+            "type": "timestamp"
+          },
+          {
+            "name": "site_name",
+            "type": "constant",
+            "value": "E-max Store"
           }
         ]
       },

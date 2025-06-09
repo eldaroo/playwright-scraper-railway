@@ -19,7 +19,7 @@
     "type": "json_css",
     "params": {
       "schema": {
-        "name": "FancyYou - Categorías múltiples",
+        "name": "FancyYou",
         "baseSelector": "div.product-list__item",
         "fields": [
           {
@@ -43,21 +43,35 @@
             "selector": "div.aspect-ratio-image-product img[src*='/0?']",
             "type": "attribute",
             "attribute": "src",
-            "transform": "return 'https://fancyyou.com.ar' + data;"
+            "transform": "return data.startsWith('http') ? data : 'https://fancyyou.com.ar' + data;"
           },
           {
             "name": "image_secondary",
             "selector": "div.aspect-ratio-image-product img[src*='/1?']",
             "type": "attribute",
             "attribute": "src",
-            "transform": "return 'https://fancyyou.com.ar' + data;"
+            "transform": "return data.startsWith('http') ? data : 'https://fancyyou.com.ar' + data;"
           },
           {
             "name": "category",
             "selector": "div.single-product",
             "type": "attribute",
             "attribute": "data-mkt-item-list-name",
-            "transform": "return data.replace('Catálogo | Category: ', '').trim();"
+            "transform": "return data ? data.replace('Catálogo | Category: ', '').trim() : 'COMBOS';"
+          },
+          {
+            "name": "source_url",
+            "type": "constant",
+            "value": "https://fancyyou.com.ar/s/?q=combo"
+          },
+          {
+            "name": "scraped_at",
+            "type": "timestamp"
+          },
+          {
+            "name": "site_name",
+            "type": "constant",
+            "value": "FancyYou"
           }
         ]
       },

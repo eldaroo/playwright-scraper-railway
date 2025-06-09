@@ -20,7 +20,7 @@
     "type": "json_css",
     "params": {
       "schema": {
-        "name": "Laura Mayorista - Productos",
+        "name": "Laura Mayorista",
         "baseSelector": "li[data-hook='product-list-grid-item']",
         "fields": [
           {
@@ -57,6 +57,20 @@
             "type": "url_extract",
             "pattern": "https://www\\.lauramayorista\\.com/([^?#]+)",
             "transform": "return decodeURIComponent(data).split('/').pop().replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');"
+          },
+          {
+            "name": "source_url",
+            "type": "constant",
+            "value": "https://www.lauramayorista.com/cabinas-y-tornos"
+          },
+          {
+            "name": "scraped_at",
+            "type": "timestamp"
+          },
+          {
+            "name": "site_name",
+            "type": "constant",
+            "value": "Laura Mayorista"
           }
         ]
       },
