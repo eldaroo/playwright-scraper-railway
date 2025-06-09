@@ -1,15 +1,18 @@
 {
   "site_name": "Laura Mayorista",
   "base_url": "https://www.lauramayorista.com",
-  "use_predefined_urls": true,
-  "urls": [
-    "https://www.lauramayorista.com/accesorios-para-mascotas",
-    "https://www.lauramayorista.com/shop",
-    "https://www.lauramayorista.com/ofertas",
-    "https://www.lauramayorista.com/electronica",
-    "https://www.lauramayorista.com/cuidado-facial",
-    "https://www.lauramayorista.com/contacto"
-  ],
+  "use_predefined_urls": false,
+  "categories_config": {
+    "selector": "ul.menu-navigation a[href*='lauramayorista.com']",
+    "attribute": "href",
+    "base_path": "www.lauramayorista.com",
+    "exclude_patterns": [
+      "/shop$",
+      "/contacto$",
+      "/informacion$",
+      "/mi-cuenta"
+    ]
+  },
   "crawler_params": {
     "headless": true,
     "defaultViewport": { "width": 1280, "height": 800 },
