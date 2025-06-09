@@ -12,12 +12,18 @@
       "/informacion$",
       "/mi-cuenta$",
       "/carrito$",
-      "/checkout$"
+      "/checkout$",
+      "/account/",
+      "/my-account",
+      "/contacto",
+      "/ubicacion",
+      "/$"
     ],
     "initial_actions": [
       { "type": "waitForLoadState", "state": "domcontentloaded" },
       { "type": "waitForLoadState", "state": "networkidle" }
-    ]
+    ],
+    "validate_url": "section[data-hook='product-list']"
   },
   "crawler_params": {
     "headless": true,
