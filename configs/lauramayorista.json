@@ -24,7 +24,19 @@
       "/login",
       "/register",
       "/password",
-      "/search"
+      "/search",
+      "/informacion",
+      "/info",
+      "/about",
+      "/ayuda",
+      "/help",
+      "/faq",
+      "/preguntas-frecuentes",
+      "/mi-cuenta",
+      "/my-orders",
+      "/mis-pedidos",
+      "/wishlist",
+      "/favoritos"
     ],
     "initial_actions": [
       { "type": "waitForLoadState", "state": "domcontentloaded" },
@@ -44,10 +56,10 @@
     ]
   },
   "pre_actions": [
-    { "type": "waitForLoadState", "state": "domcontentloaded", "timeout": 30000 },
-    { "type": "waitForLoadState", "state": "networkidle", "timeout": 30000 },
-    { "type": "waitForSelector", "selector": "section[data-hook='product-list']", "timeout": 30000 },
-    { "type": "waitForSelector", "selector": "ul[data-hook='product-list-wrapper']", "timeout": 30000 }
+    { "type": "waitForLoadState", "state": "domcontentloaded", "timeout": 30000, "continue_on_validation_error": true },
+    { "type": "waitForLoadState", "state": "networkidle", "timeout": 30000, "continue_on_validation_error": true },
+    { "type": "waitForSelector", "selector": "section[data-hook='product-list']", "timeout": 30000, "continue_on_validation_error": true },
+    { "type": "waitForSelector", "selector": "ul[data-hook='product-list-wrapper']", "timeout": 30000, "continue_on_validation_error": true }
   ],
   "extraction_config": {
     "type": "json_css",
