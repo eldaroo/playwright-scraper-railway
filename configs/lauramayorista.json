@@ -3,20 +3,13 @@
   "base_url": "https://www.lauramayorista.com",
   "use_predefined_urls": false,
   "categories_config": {
-    "selector": "nav.menu-navigation a[href*='lauramayorista.com'], a[data-testid='linkElement'][href*='lauramayorista.com']",
+    "selector": "ul.menu-navigation li:has(a:contains('Catálogo')) ul a[href*='lauramayorista.com']",
     "attribute": "href",
     "base_path": "www.lauramayorista.com",
     "exclude_patterns": [
       "/shop$",
-      "/contacto$",
-      "/informacion$",
-      "/mi-cuenta$",
       "/carrito$",
       "/checkout$",
-      "/account/",
-      "/my-account",
-      "/contacto",
-      "/ubicacion",
       "/$"
     ],
     "initial_actions": [
