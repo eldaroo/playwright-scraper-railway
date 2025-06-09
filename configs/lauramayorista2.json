@@ -3,7 +3,7 @@
   "base_url": "https://www.lauramayorista.com",
   "use_predefined_urls": true,
   "urls": [
-    "https://www.lauramayorista.com/insumos-de-unas"
+    "https://www.lauramayorista.com/cabinas-y-tornos"
   ],
   "crawler_params": {
     "headless": true,

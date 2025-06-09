@@ -3,7 +3,7 @@
   "base_url": "https://fancyyou.com.ar",
   "use_predefined_urls": true,
   "urls": [
-    "https://fancyyou.com.ar/categoria/nuevos-ingresos"
+    "https://fancyyou.com.ar/s/?q=combo"
   ],
   "crawler_params": {
     "headless": true,

@@ -3,7 +3,7 @@
   "base_url": "https://e-max-store.com",
   "use_predefined_urls": true,
   "urls": [
-    "https://e-max-store.com/auricular/"
+    "https://e-max-store.com/calculadora/"
   ],
   "crawler_params": {
     "headless": true,
