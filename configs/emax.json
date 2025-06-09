@@ -63,6 +63,17 @@
             "selector": "a.woocommerce-LoopProduct-link",
             "type": "attribute",
             "attribute": "href"
+          },
+          {
+            "name": "sku",
+            "selector": "a.button.add_to_cart_button",
+            "type": "attribute",
+            "attribute": "data-product-sku"
+          },
+          {
+            "name": "category",
+            "selector": ".elementor-divider__text",
+            "type": "text"
           }
         ]
       },
