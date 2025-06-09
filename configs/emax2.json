@@ -64,7 +64,7 @@
           },
           {
             "name": "sku",
-            "selector": "a.button.add_to_cart_button",
+            "selector": ".button.add_to_cart_button.ajax_add_to_cart",
             "type": "attribute",
             "attribute": "data-product-sku"
           },
