@@ -3,14 +3,20 @@
   "base_url": "https://www.lauramayorista.com",
   "use_predefined_urls": false,
   "categories_config": {
-    "selector": "ul.menu-navigation a[href*='lauramayorista.com']",
+    "selector": "nav.menu-navigation a[href*='lauramayorista.com'], a[data-testid='linkElement'][href*='lauramayorista.com']",
     "attribute": "href",
     "base_path": "www.lauramayorista.com",
     "exclude_patterns": [
       "/shop$",
       "/contacto$",
       "/informacion$",
-      "/mi-cuenta"
+      "/mi-cuenta$",
+      "/carrito$",
+      "/checkout$"
+    ],
+    "initial_actions": [
+      { "type": "waitForLoadState", "state": "domcontentloaded" },
+      { "type": "waitForLoadState", "state": "networkidle" }
     ]
   },
   "crawler_params": {
