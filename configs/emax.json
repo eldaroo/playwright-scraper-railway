@@ -5,7 +5,25 @@
   "categories_config": {
     "selector": ".menu-item-type-post_type.menu-item-object-page > a",
     "attribute": "href",
-    "base_path": "e-max-store.com"
+    "base_path": "e-max-store.com",
+    "validate_url": "ul.products li.product",
+    "validation_timeout": 15000,
+    "continue_on_validation_error": true,
+    "exclude_patterns": [
+      "/mi-cuenta",
+      "/carrito",
+      "/checkout",
+      "/finalizar-compra",
+      "/contacto",
+      "/sobre-nosotros",
+      "/politica-de-privacidad",
+      "/preguntas-frecuentes",
+      "/terminos-y-condiciones",
+      "/login",
+      "/register",
+      "/password",
+      "/search"
+    ]
   },
   "crawler_params": {
     "headless": true,
