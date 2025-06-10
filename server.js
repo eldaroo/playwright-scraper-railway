@@ -131,10 +131,25 @@ async function discoverCategories(browser, siteConfig) {
 
 async function scrapeUrl(browser, url, siteConfig, context) {
   console.log(`[SCRAPER] Starting scrape on: ${url}`);
-  const page = await context.newPage();
-  
+  let page = null;
+
   try {
-    await page.setViewportSize(siteConfig.crawler_params.defaultViewport);
+    // Crear nueva página con manejo de errores
+    try {
+      page = await context.newPage();
+    } catch (error) {
+      console.log(`[SCRAPER] Error al crear nueva página: ${error.message}. Intentando crear nuevo contexto...`);
+      context = await browser.newContext();
+      page = await context.newPage();
+    }
+
+    // Configurar viewport
+    try {
+      await page.setViewportSize(siteConfig.crawler_params.defaultViewport);
+    } catch (error) {
+      console.log(`[SCRAPER] Error al configurar viewport: ${error.message}. Continuando...`);
+    }
+
     console.log(`[SCRAPER] Navigating to ${url}`);
     
     // Carga inicial de la página
@@ -142,6 +157,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
     } catch (error) {
       console.log(`[SCRAPER] Initial load failed: ${error.message}`);
+      await safeClosePage(page);
       return [];
     }
 
@@ -150,7 +166,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
       await page.waitForSelector('ul.products li.product', { timeout: 45000 });
     } catch (err) {
       console.log(`[SCRAPER] No se encontró contenido en ${url}. Continuando...`);
-      await page.close();
+      await safeClosePage(page);
       return [];
     }
 
@@ -201,19 +217,28 @@ async function scrapeUrl(browser, url, siteConfig, context) {
         site_name: siteConfig.site_name
       }));
 
-      await page.close();
+      await safeClosePage(page);
       return enrichedProducts;
     } catch (error) {
       console.error(`[ERROR] Failed to extract products from ${url}:`, error);
-      await page.close();
+      await safeClosePage(page);
       return [];
     }
   } catch (error) {
     console.error(`[ERROR] Unexpected error in ${url}:`, error);
-    try {
-      await page.close();
-    } catch {}
+    await safeClosePage(page);
     return [];
+  }
+}
+
+// Función auxiliar para cerrar página de forma segura
+async function safeClosePage(page) {
+  try {
+    if (page && !page.isClosed()) {
+      await page.close();
+    }
+  } catch (error) {
+    console.log('[SCRAPER] Error al cerrar página:', error.message);
   }
 }
 
