@@ -36,30 +36,42 @@
             },
             {
               "name": "price",
-              "selector": ".product-price span.price",
+              "selector": ".product-price span.price:not(.old)",
               "type": "text",
               "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
             },
             {
-              "name": "image_primary",
-              "selector": "div.aspect-ratio-image-product img[src*='/0?']",
-              "type": "attribute",
-              "attribute": "src",
-              "transform": "return 'https://fancyyou.com.ar' + data;"
+              "name": "price_original",
+              "selector": ".product-price span.price.old",
+              "type": "text",
+              "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
             },
             {
-              "name": "image_secondary",
-              "selector": "div.aspect-ratio-image-product img[src*='/1?']",
+              "name": "image",
+              "selector": ".aspect-ratio-image-product img",
               "type": "attribute",
               "attribute": "src",
-              "transform": "return 'https://fancyyou.com.ar' + data;"
+              "transform": "return data.startsWith('/') ? 'https://fancyyou.com.ar' + data : data;"
+            },
+            {
+              "name": "url",
+              "selector": "h3 a",
+              "type": "attribute",
+              "attribute": "href",
+              "transform": "return data.startsWith('/') ? 'https://fancyyou.com.ar' + data : data;"
             },
             {
               "name": "category",
               "selector": "div.single-product",
               "type": "attribute",
               "attribute": "data-mkt-item-list-name",
-              "transform": "return data.replace('Catálogo | Category: ', '').trim();"
+              "transform": "return data.replace('Catálogo | Category: ', '').replace('Catálogo | Texto: ', '').trim();"
+            },
+            {
+              "name": "discount_percentage",
+              "selector": ".sticker.discount span",
+              "type": "text",
+              "transform": "return data.replace(/[^\\d]/g, '');"
             }
           ]
         },
