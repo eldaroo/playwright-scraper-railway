@@ -132,33 +132,69 @@ async function discoverCategories(browser, siteConfig) {
 async function scrapeUrl(browser, url, siteConfig, context) {
   console.log(`[SCRAPER] Starting scrape on: ${url}`);
   const page = await context.newPage();
-  await page.setViewportSize(siteConfig.crawler_params.defaultViewport);
   
   try {
+    await page.setViewportSize(siteConfig.crawler_params.defaultViewport);
     console.log(`[SCRAPER] Navigating to ${url}`);
     
     // Primero intentamos una carga rápida
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    try {
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    } catch (error) {
+      console.log(`[SCRAPER] Initial load failed, retrying with longer timeout: ${error.message}`);
+      await page.goto(url, { waitUntil: 'load', timeout: 45000 });
+    }
     
     // Esperamos un tiempo corto para que cargue el contenido dinámico básico
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
+
+    // Verificar si la página está vacía o tiene mensaje de no productos
+    const hasEmptyMessage = await page.evaluate(() => {
+      const body = document.body.textContent.toLowerCase();
+      return body.includes('no hay productos') ||
+             body.includes('no se encontraron productos') ||
+             body.includes('categoría vacía') ||
+             body.includes('no products found');
+    });
+
+    if (hasEmptyMessage) {
+      console.log(`[SCRAPER] Empty category detected in ${url}`);
+      await page.close();
+      return [];
+    }
 
     // Ejecutar pre-actions con manejo de errores
     for (const action of siteConfig.pre_actions) {
       console.log(`[SCRAPER] Executing pre-action: ${action.type} for selector "${action.selector}"`);
       try {
         if (action.type === 'waitForSelector') {
-          await Promise.race([
-            page.waitForSelector(action.selector, { timeout: action.timeout }),
-            page.waitForFunction(() => {
-              // Si encontramos un mensaje de "no hay productos", también continuamos
-              return document.body.textContent.includes('No hay productos') ||
-                     document.body.textContent.includes('No se encontraron productos') ||
-                     document.body.textContent.includes('Categoría vacía');
-            }, { timeout: action.timeout })
-          ]);
-          await page.screenshot({ path: `./screenshots/after-${action.selector.replace(/[^a-z0-9]/gi, '_')}.png` });
-          console.log(`[SCRAPER] Selector "${action.selector}" found or empty state detected`);
+          // Intentar múltiples veces con timeouts incrementales
+          for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+              await page.waitForSelector(action.selector, { 
+                timeout: action.timeout * attempt,
+                state: 'attached' // Menos estricto que 'visible'
+              });
+              break;
+            } catch (error) {
+              if (attempt === 3) throw error;
+              console.log(`[SCRAPER] Attempt ${attempt} failed, retrying...`);
+              await page.waitForTimeout(1000);
+            }
+          }
+          
+          // Solo tomamos screenshot si la página no está crasheada
+          try {
+            if (page.isClosed()) throw new Error('Page is closed');
+            await page.screenshot({ 
+              path: `./screenshots/after-${action.selector.replace(/[^a-z0-9]/gi, '_')}.png`,
+              timeout: 5000
+            });
+          } catch (screenshotError) {
+            console.log(`[SCRAPER] Screenshot failed but continuing: ${screenshotError.message}`);
+          }
+          
+          console.log(`[SCRAPER] Selector "${action.selector}" found`);
         } else if (action.type === 'goto') {
           await page.goto(action.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
         }
@@ -170,10 +206,16 @@ async function scrapeUrl(browser, url, siteConfig, context) {
       }
     }
 
-    // Log HTML content for debugging
-    const html = await page.content();
-    fs.writeFileSync('./screenshots/page-content.html', html);
-    console.log('[SCRAPER] Saved page HTML content');
+    // Log HTML content for debugging (con manejo de errores)
+    try {
+      if (!page.isClosed()) {
+        const html = await page.content();
+        fs.writeFileSync('./screenshots/page-content.html', html);
+        console.log('[SCRAPER] Saved page HTML content');
+      }
+    } catch (error) {
+      console.log(`[SCRAPER] Failed to save HTML content: ${error.message}`);
+    }
 
     const schema = siteConfig.extraction_config.params.schema;
     console.log(`[SCRAPER] Looking for products with selector: ${schema.baseSelector}`);
