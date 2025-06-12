@@ -46,56 +46,65 @@
     "pre_actions": [
         { "type": "waitForLoadState", "state": "domcontentloaded" },
         { "type": "waitForLoadState", "state": "networkidle" },
-        { "type": "waitForSelector", "selector": "article.product-item", "timeout": 30000 }
+        { "type": "waitForSelector", "selector": "div.product-list__item", "timeout": 30000 }
     ],
     "extraction_config": {
         "type": "json_css",
         "params": {
             "schema": {
                 "name": "FancyYou",
-                "baseSelector": "article.product-item",
+                "baseSelector": "div.product-list__item",
                 "fields": [
                     {
                         "name": "title",
-                        "selector": "h3",
-                        "type": "text"
+                        "selector": ".single-product--caption h3 a",
+                        "type": "text",
+                        "transform": "return data.trim();"
                     },
                     {
                         "name": "sku",
-                        "selector": ".sku",
+                        "selector": "small.sku.text-muted",
                         "type": "text",
                         "transform": "return data.replace('SKU ', '');"
                     },
                     {
                         "name": "price",
-                        "selector": ".price",
+                        "selector": "span.price",
                         "type": "text",
                         "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
                     },
                     {
-                        "name": "image",
-                        "selector": ".aspect-ratio-image-product img",
+                        "name": "image_primary",
+                        "selector": ".aspect-ratio-image-product .ek-img:first-child img",
+                        "type": "attribute",
+                        "attribute": "src",
+                        "transform": "return data.startsWith('/') ? 'https://fancyyou.com.ar' + data : data;"
+                    },
+                    {
+                        "name": "image_secondary",
+                        "selector": ".aspect-ratio-image-product .image-backward img",
                         "type": "attribute",
                         "attribute": "src",
                         "transform": "return data.startsWith('/') ? 'https://fancyyou.com.ar' + data : data;"
                     },
                     {
                         "name": "url",
-                        "selector": "h3 a",
+                        "selector": "a.single-product__more-info",
                         "type": "attribute",
                         "attribute": "href"
                     },
                     {
                         "name": "category",
-                        "type": "url_extract",
-                        "pattern": "https://fancyyou\\.com\\.ar/categoria/([^?#/]+)(?:/[^?#]*)?",
-                        "transform": "return decodeURIComponent(data).replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');"
+                        "selector": "div.single-product",
+                        "type": "attribute",
+                        "attribute": "data-mkt-item-list-name",
+                        "transform": "return data ? data.replace('Catálogo | Category: ', '').replace('Catálogo | Texto: ', '').trim() : '';"
                     },
                     {
                         "name": "status",
-                        "selector": "button.btn-comprar",
+                        "selector": "button.btn.btn-block.ek-btn-primary",
                         "type": "text",
-                        "transform": "return data === 'Agotado' ? 'out_of_stock' : 'in_stock';"
+                        "transform": "return data && data.includes('Comprar') ? 'in_stock' : 'out_of_stock';"
                     },
                     {
                         "name": "source_url",

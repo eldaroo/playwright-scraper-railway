@@ -161,14 +161,30 @@ async function scrapeUrl(browser, url, siteConfig, context) {
       return [];
     }
 
-    // Esperar por productos con manejo de error simple
+    // DEBUG: Screenshot y logs antes de buscar productos
+    const debugBeforePath = `screenshots/debug_before-products.png`;
+    await page.screenshot({ path: debugBeforePath });
+    const baseSelector = siteConfig.extraction_config.params.schema.baseSelector;
+    const count = await page.$$eval(baseSelector, els => els.length);
+    console.log(`[DEBUG] Cantidad de productos encontrados antes de esperar:`, count);
+    if (count === 0) {
+      const html = await page.content();
+      fs.writeFileSync('screenshots/page-content.html', html);
+    }
+
+    // Esperar por productos usando el baseSelector del schema
     try {
-      await page.waitForSelector('ul.products li.product', { timeout: 45000 });
+      await page.waitForSelector(baseSelector, { timeout: 45000 });
     } catch (err) {
       console.log(`[SCRAPER] No se encontró contenido en ${url}. Continuando...`);
+      // DEBUG: Screenshot después de no encontrar productos
+      await page.screenshot({ path: `screenshots/debug_after-products.png` });
       await safeClosePage(page);
       return [];
     }
+
+    // DEBUG: Screenshot después de encontrar productos
+    await page.screenshot({ path: `screenshots/debug_after-products.png` });
 
     // Si llegamos aquí, hay productos, intentamos extraerlos
     try {
