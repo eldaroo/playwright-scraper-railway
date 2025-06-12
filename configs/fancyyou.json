@@ -44,29 +44,31 @@
         ]
     },
     "pre_actions": [
-        { "type": "waitForSelector", "selector": "div.product-list__item", "timeout": 15000 }
+        { "type": "waitForLoadState", "state": "domcontentloaded" },
+        { "type": "waitForLoadState", "state": "networkidle" },
+        { "type": "waitForSelector", "selector": ".product-grid", "timeout": 30000 }
     ],
     "extraction_config": {
         "type": "json_css",
         "params": {
             "schema": {
                 "name": "FancyYou",
-                "baseSelector": "div.product-list__item.col-xs-6.col-sm-3",
+                "baseSelector": ".product-grid article",
                 "fields": [
                     {
                         "name": "title",
-                        "selector": "h3 a.single-product__more-info",
+                        "selector": "h3",
                         "type": "text"
                     },
                     {
                         "name": "sku",
-                        "selector": "small.sku.text-muted",
+                        "selector": ".sku",
                         "type": "text",
                         "transform": "return data.replace('SKU ', '');"
                     },
                     {
                         "name": "price",
-                        "selector": ".product-price span.price",
+                        "selector": ".price",
                         "type": "text",
                         "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
                     },
@@ -79,20 +81,19 @@
                     },
                     {
                         "name": "url",
-                        "selector": "h3 a.single-product__more-info",
+                        "selector": "h3 a",
                         "type": "attribute",
                         "attribute": "href"
                     },
                     {
                         "name": "category",
-                        "selector": "div.single-product",
-                        "type": "attribute",
-                        "attribute": "data-mkt-item-list-name",
-                        "transform": "return data ? data.replace('Catálogo | Texto: ', '').replace('Catálogo | Category: ', '').trim() : '';"
+                        "type": "url_extract",
+                        "pattern": "https://fancyyou\\.com\\.ar/categoria/([^?#/]+)(?:/[^?#]*)?",
+                        "transform": "return decodeURIComponent(data).replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');"
                     },
                     {
                         "name": "status",
-                        "selector": "button.btn.btn-block.ek-btn-primary",
+                        "selector": "button.btn-comprar",
                         "type": "text",
                         "transform": "return data === 'Agotado' ? 'out_of_stock' : 'in_stock';"
                     },
