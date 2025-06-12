@@ -3,7 +3,7 @@
     "base_url": "https://fancyyou.com.ar",
     "use_predefined_urls": false,
     "categories_config": {
-        "selector": "a[href*='/categoria/']",
+        "selector": "a.menu-link[href*='/categoria/']",
         "attribute": "href",
         "base_path": "fancyyou.com.ar/categoria/",
         "exclude_patterns": [
@@ -29,7 +29,7 @@
             { "type": "waitForLoadState", "state": "domcontentloaded" },
             { "type": "waitForLoadState", "state": "networkidle" }
         ],
-        "validate_url": ".product-list__item",
+        "validate_url": "div.product-list__item",
         "validation_timeout": 30000,
         "continue_on_validation_error": true
     },
@@ -54,14 +54,14 @@
     "pre_actions": [
         { "type": "waitForLoadState", "state": "domcontentloaded", "timeout": 30000 },
         { "type": "waitForLoadState", "state": "networkidle", "timeout": 30000 },
-        { "type": "waitForSelector", "selector": ".product-list__item", "timeout": 30000 }
+        { "type": "waitForSelector", "selector": "div.product-list__item", "timeout": 30000 }
     ],
     "extraction_config": {
         "type": "json_css",
         "params": {
             "schema": {
-                "name": "FancyYou - Categorías múltiples",
-                "baseSelector": ".product-list__item",
+                "name": "FancyYou",
+                "baseSelector": "div.product-list__item",
                 "fields": [
                     {
                         "name": "title",
@@ -75,22 +75,23 @@
                     },
                     {
                         "name": "price",
-                        "selector": ".product-price span.price:not(.old)",
+                        "selector": ".product-price span.price",
                         "type": "text",
                         "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
                     },
                     {
-                        "name": "price_original",
-                        "selector": ".product-price span.price.old",
-                        "type": "text",
-                        "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
-                    },
-                    {
-                        "name": "image",
-                        "selector": ".aspect-ratio-image-product img",
+                        "name": "image_primary",
+                        "selector": "div.aspect-ratio-image-product img[src*='/0?']",
                         "type": "attribute",
                         "attribute": "src",
-                        "transform": "return data.startsWith('/') ? 'https://fancyyou.com.ar' + data : data;"
+                        "transform": "return data.startsWith('http') ? data : 'https://fancyyou.com.ar' + data;"
+                    },
+                    {
+                        "name": "image_secondary",
+                        "selector": "div.aspect-ratio-image-product img[src*='/1?']",
+                        "type": "attribute",
+                        "attribute": "src",
+                        "transform": "return data.startsWith('http') ? data : 'https://fancyyou.com.ar' + data;"
                     },
                     {
                         "name": "url",
@@ -101,15 +102,10 @@
                     },
                     {
                         "name": "category",
-                        "type": "url_extract",
-                        "pattern": "https://fancyyou\\.com\\.ar/categoria/([^?#/]+)(?:/[^?#]*)?",
-                        "transform": "return decodeURIComponent(data).replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');"
-                    },
-                    {
-                        "name": "discount_percentage",
-                        "selector": ".sticker.discount span",
-                        "type": "text",
-                        "transform": "return data.replace(/[^\\d]/g, '');"
+                        "selector": "div.single-product",
+                        "type": "attribute",
+                        "attribute": "data-mkt-item-list-name",
+                        "transform": "return data ? data.replace('Catálogo | Category: ', '').trim() : '';"
                     },
                     {
                         "name": "source_url",
