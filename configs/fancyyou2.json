@@ -25,14 +25,14 @@
   "pre_actions": [
     { "type": "waitForLoadState", "state": "domcontentloaded" },
     { "type": "waitForLoadState", "state": "networkidle" },
-    { "type": "waitForSelector", "selector": ".product-grid", "timeout": 30000 }
+    { "type": "waitForSelector", "selector": "article.product-item", "timeout": 30000 }
   ],
   "extraction_config": {
     "type": "json_css",
     "params": {
       "schema": {
         "name": "FancyYou",
-        "baseSelector": ".product-grid article",
+        "baseSelector": "article.product-item",
         "fields": [
           {
             "name": "title",
