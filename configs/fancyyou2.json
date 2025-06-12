@@ -9,55 +9,71 @@
     "headless": true,
     "defaultViewport": { "width": 1280, "height": 800 },
     "args": [
-      "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+      "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+      "--disable-dev-shm-usage",
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-gpu",
+      "--disable-software-rasterizer",
+      "--disable-extensions",
+      "--max-old-space-size=4096",
+      "--ignore-certificate-errors",
+      "--disable-web-security",
+      "--disable-features=IsolateOrigins,site-per-process"
     ]
   },
   "pre_actions": [
-    { "type": "waitForSelector", "selector": "div.product-list__item", "timeout": 15000 }
+    { "type": "waitForLoadState", "state": "domcontentloaded" },
+    { "type": "waitForLoadState", "state": "networkidle" },
+    { "type": "waitForSelector", "selector": ".product-grid", "timeout": 30000 }
   ],
   "extraction_config": {
     "type": "json_css",
     "params": {
       "schema": {
         "name": "FancyYou",
-        "baseSelector": "div.product-list__item",
+        "baseSelector": ".product-grid article",
         "fields": [
           {
             "name": "title",
-            "selector": "h3 a",
+            "selector": "h3",
             "type": "text"
           },
           {
             "name": "sku",
-            "selector": "small.sku",
-            "type": "text"
+            "selector": ".sku",
+            "type": "text",
+            "transform": "return data.replace('SKU ', '');"
           },
           {
             "name": "price",
-            "selector": ".product-price span.price",
+            "selector": ".price",
             "type": "text",
             "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
           },
           {
-            "name": "image_primary",
-            "selector": "div.aspect-ratio-image-product img[src*='/0?']",
+            "name": "image",
+            "selector": ".aspect-ratio-image-product img",
             "type": "attribute",
             "attribute": "src",
-            "transform": "return data.startsWith('http') ? data : 'https://fancyyou.com.ar' + data;"
+            "transform": "return data.startsWith('/') ? 'https://fancyyou.com.ar' + data : data;"
           },
           {
-            "name": "image_secondary",
-            "selector": "div.aspect-ratio-image-product img[src*='/1?']",
+            "name": "url",
+            "selector": "h3 a",
             "type": "attribute",
-            "attribute": "src",
-            "transform": "return data.startsWith('http') ? data : 'https://fancyyou.com.ar' + data;"
+            "attribute": "href"
           },
           {
             "name": "category",
-            "selector": "div.single-product",
-            "type": "attribute",
-            "attribute": "data-mkt-item-list-name",
-            "transform": "return data ? data.replace('Catálogo | Category: ', '').trim() : 'PORTA SUBE';"
+            "type": "constant",
+            "value": "Porta Sube"
+          },
+          {
+            "name": "status",
+            "selector": "button.btn-comprar",
+            "type": "text",
+            "transform": "return data === 'Agotado' ? 'out_of_stock' : 'in_stock';"
           },
           {
             "name": "source_url",
