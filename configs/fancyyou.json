@@ -5,7 +5,7 @@
     "categories_config": {
         "selector": "a[href*='/categoria/']",
         "attribute": "href",
-        "base_path": "fancyyou.com.ar/categoria/",
+        "base_path": "/categoria/",
         "exclude_patterns": [
             "/carrito",
             "/checkout",
