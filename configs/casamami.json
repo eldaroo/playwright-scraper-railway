@@ -1,0 +1,134 @@
+{
+    "site_name": "Casa Mami",
+    "base_url": "https://casamami.com.ar",
+    "use_predefined_urls": true,
+    "urls": [
+      "https://casamami.com.ar/categoría-producto/anillos/anillos-de-acero-quirurgico/",
+      "https://casamami.com.ar/categoría-producto/anillos/anillos-de-fantasia/",
+      "https://casamami.com.ar/categoría-producto/anillos/anillos-macizos-de-acero-quirurgico/",
+      "https://casamami.com.ar/categoría-producto/aros/todos-aros/",
+      "https://casamami.com.ar/categoría-producto/bijouterie/todos-bijouterie/",
+      "https://casamami.com.ar/categoría-producto/billeteras/",
+      "https://casamami.com.ar/categoría-producto/cadenas/",
+      "https://casamami.com.ar/categoría-producto/carteras/",
+      "https://casamami.com.ar/categoría-producto/corbatas/",
+      "https://casamami.com.ar/categoría-producto/dijes/todos/"
+    ],
+    "auth_config": {
+      "login_url": "https://casamami.com.ar/mi-cuenta/",
+      "login_button_selector": "a[title='Acceder']",
+      "form_selectors": {
+        "username": "#username",
+        "password": "#password"
+      },
+      "submit_button": ".woocommerce-form-login__submit",
+      "credentials": {
+        "username": "darioegea@gmail.com",
+        "password": "Dariowinner_90"
+      },
+      "success_check": {
+        "selector": "a[href*='mi-cuenta'], .woocommerce-MyAccount-content",
+        "timeout": 20000
+      }
+    },
+    "crawler_params": {
+      "headless": true,
+      "defaultViewport": {
+        "width": 1280,
+        "height": 800
+      },   
+      "args": [
+        "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+      ]
+    },
+    "pagination": {
+        "selector": "a.next.page-number",
+        "attribute": "href",
+        "max_pages": 100
+    }, 
+    "pre_actions": [
+      {
+        "type": "waitForLoadState",
+        "state": "domcontentloaded"
+      },
+      {
+        "type": "waitForLoadState",
+        "state": "networkidle"
+      },
+      {
+        "type": "waitForSelector",
+        "selector": "div.product-small.col.has-hover.product",
+        "timeout": 20000
+      }
+    ],
+    "post_actions": [
+      {
+        "type": "screenshot",
+        "path": "debug_after-products.png"
+      }
+    ],
+    "extraction_config": {
+      "type": "json_css",
+      "params": {
+        "schema": {
+          "name": "Casa Mami",
+          "baseSelector": "div.product-small.col.has-hover.product",
+          "fields": [
+            {
+              "name": "title",
+              "selector": "p.name.product-title.woocommerce-loop-product__title a",
+              "type": "text",
+              "transform": "return data.trim();"
+            },
+            {
+              "name": "price",
+              "selector": "div.price-wrapper span.price",
+              "type": "text",
+              "transform": "if (!data) return null; const m=data.match(/([\\d\\.]+,[\\d]+)/g); return m ? m.pop() : data;"
+            },
+            {
+              "name": "image",
+              "selector": "div.box-image img",
+              "type": "attribute",
+              "attribute": "src"
+            },
+            {
+              "name": "url",
+              "selector": "p.name.product-title.woocommerce-loop-product__title a",
+              "type": "attribute",
+              "attribute": "href"
+            },
+            {
+              "name": "status",
+              "selector": ".button.alt.options-vars",
+              "type": "text",
+              "transform": "return data && data.toLowerCase().includes('ver opciones') ? 'in_stock' : 'out_of_stock';"
+            },
+            {
+              "name": "category",
+              "type": "constant",
+              "value": "Casa Mami"
+            },
+            {
+              "name": "source_url",
+              "type": "url"
+            },
+            {
+              "name": "scraped_at",
+              "type": "timestamp"
+            },
+            {
+              "name": "site_name",
+              "type": "constant",
+              "value": "Casa Mami"
+            }
+          ]
+        },
+        "verbose": true
+      }
+    },
+    "cache_mode": "bypass",
+    "semaphore_count": 2,
+    "verbose": true
+  }
+  

@@ -3,128 +3,136 @@
     "base_url": "https://fancyyou.com.ar",
     "use_predefined_urls": false,
     "categories_config": {
-        "selector": "a[href*='/categoria/']",
-        "attribute": "href",
-        "base_path": "/categoria/",
-        "exclude_patterns": [
-            "/carrito",
-            "/checkout",
-            "/$",
-            "/my-account",
-            "/account",
-            "/contacto",
-            "/información",
-            "/ubicación",
-            "/ofertas",
-            "/nosotros",
-            "/politicas",
-            "/terminos",
-            "/cuenta",
-            "/login",
-            "/register",
-            "/password",
-            "/search"
-        ]
+      "selector": "a[href*='/categoria/']",
+      "attribute": "href",
+      "base_path": "/categoria/",
+      "exclude_patterns": [
+        "/carrito",
+        "/checkout",
+        "/my-account",
+        "/account",
+        "/contacto",
+        "/información",
+        "/ubicación",
+        "/ofertas",
+        "/nosotros",
+        "/politicas",
+        "/terminos",
+        "/cuenta",
+        "/login",
+        "/register",
+        "/password",
+        "/search"
+      ]
     },
     "crawler_params": {
-        "headless": true,
-        "defaultViewport": { "width": 1280, "height": 800 },
-        "args": [
-            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
-            "--disable-dev-shm-usage",
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-gpu",
-            "--disable-software-rasterizer",
-            "--disable-extensions",
-            "--max-old-space-size=4096",
-            "--ignore-certificate-errors",
-            "--disable-web-security",
-            "--disable-features=IsolateOrigins,site-per-process"
-        ]
+      "headless": true,
+      "defaultViewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "args": [
+        "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+        "--disable-dev-shm-usage",
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-gpu",
+        "--disable-software-rasterizer",
+        "--disable-extensions",
+        "--max-old-space-size=4096",
+        "--ignore-certificate-errors",
+        "--disable-web-security",
+        "--disable-features=IsolateOrigins,site-per-process"
+      ]
+    },
+    "pagination": {
+      "selector": "a.next.page-number",
+      "attribute": "href",
+      "max_pages": 100
     },
     "pre_actions": [
-        { "type": "waitForLoadState", "state": "domcontentloaded" },
-        { "type": "waitForLoadState", "state": "networkidle" },
-        { "type": "waitForSelector", "selector": "div.product-list__item", "timeout": 30000 }
+      { "type": "waitForLoadState", "state": "domcontentloaded" },
+      { "type": "waitForLoadState", "state": "networkidle" },
+      { "type": "waitForSelector", "selector": "div.product-list__item", "timeout": 30000 }
     ],
     "extraction_config": {
-        "type": "json_css",
-        "params": {
-            "schema": {
-                "name": "FancyYou",
-                "baseSelector": "div.product-list__item",
-                "fields": [
-                    {
-                        "name": "title",
-                        "selector": ".single-product--caption h3 a",
-                        "type": "text",
-                        "transform": "return data.trim();"
-                    },
-                    {
-                        "name": "sku",
-                        "selector": "small.sku.text-muted",
-                        "type": "text",
-                        "transform": "return data.replace('SKU ', '');"
-                    },
-                    {
-                        "name": "price",
-                        "selector": "span.price",
-                        "type": "text",
-                        "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
-                    },
-                    {
-                        "name": "image_primary",
-                        "selector": ".aspect-ratio-image-product .ek-img:first-child img",
-                        "type": "attribute",
-                        "attribute": "src",
-                        "transform": "return data.startsWith('/') ? 'https://fancyyou.com.ar' + data : data;"
-                    },
-                    {
-                        "name": "image_secondary",
-                        "selector": ".aspect-ratio-image-product .image-backward img",
-                        "type": "attribute",
-                        "attribute": "src",
-                        "transform": "return data.startsWith('/') ? 'https://fancyyou.com.ar' + data : data;"
-                    },
-                    {
-                        "name": "url",
-                        "selector": "a.single-product__more-info",
-                        "type": "attribute",
-                        "attribute": "href"
-                    },
-                    {
-                        "name": "category",
-                        "selector": "div.single-product",
-                        "type": "attribute",
-                        "attribute": "data-mkt-item-list-name",
-                        "transform": "return data ? data.replace('Catálogo | Category: ', '').replace('Catálogo | Texto: ', '').trim() : '';"
-                    },
-                    {
-                        "name": "status",
-                        "selector": "button.btn.btn-block.ek-btn-primary",
-                        "type": "text",
-                        "transform": "return data && data.includes('Comprar') ? 'in_stock' : 'out_of_stock';"
-                    },
-                    {
-                        "name": "source_url",
-                        "type": "url"
-                    },
-                    {
-                        "name": "scraped_at",
-                        "type": "timestamp"
-                    },
-                    {
-                        "name": "site_name",
-                        "type": "constant",
-                        "value": "FancyYou"
-                    }
-                ]
+      "type": "json_css",
+      "params": {
+        "schema": {
+          "name": "FancyYou",
+          "baseSelector": "div.product-list__item",
+          "fields": [
+            {
+              "name": "title",
+              "selector": ".single-product--caption h3 a",
+              "type": "text",
+              "transform": "return data.trim();"
             },
-            "verbose": true
-        }
+            {
+              "name": "sku",
+              "selector": "small.sku.text-muted",
+              "type": "text",
+              "transform": "return data.replace('SKU ', '');"
+            },
+            {
+              "name": "price",
+              "selector": "span.price",
+              "type": "text",
+              "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
+            },
+            {
+              "name": "image_primary",
+              "selector": ".aspect-ratio-image-product .ek-img:first-child img",
+              "type": "attribute",
+              "attribute": "src",
+              "transform": "return data.startsWith('/') ? 'https://fancyyou.com.ar' + data : data;"
+            },
+            {
+              "name": "image_secondary",
+              "selector": ".aspect-ratio-image-product .image-backward img",
+              "type": "attribute",
+              "attribute": "src",
+              "transform": "return data.startsWith('/') ? 'https://fancyyou.com.ar' + data : data;"
+            },
+            {
+              "name": "url",
+              "selector": "a.single-product__more-info",
+              "type": "attribute",
+              "attribute": "href"
+            },
+            {
+              "name": "category",
+              "selector": "div.single-product",
+              "type": "attribute",
+              "attribute": "data-mkt-item-list-name",
+              "transform": "return data ? data.replace('Catálogo | Category: ', '').replace('Catálogo | Texto: ', '').trim() : '';"
+            },
+            {
+              "name": "status",
+              "selector": "button.btn.btn-block.ek-btn-primary",
+              "type": "text",
+              "transform": "return data && data.includes('Comprar') ? 'in_stock' : 'out_of_stock';"
+            },
+            {
+              "name": "source_url",
+              "type": "url"
+            },
+            {
+              "name": "scraped_at",
+              "type": "timestamp"
+            },
+            {
+              "name": "site_name",
+              "type": "constant",
+              "value": "FancyYou"
+            }
+          ]
+        },
+        "verbose": true
+      }
     },
     "cache_mode": "bypass",
     "semaphore_count": 2,
     "verbose": true
-}
+  }
+  
