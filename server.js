@@ -54,7 +54,7 @@ async function discoverCategories(browser, siteConfig) {
       ? route.abort()
       : route.continue();
   });
-  
+
   if (siteConfig.auth_config) {
     await performLogin(page, siteConfig.auth_config);
   }
@@ -74,7 +74,7 @@ async function discoverCategories(browser, siteConfig) {
         .filter(href => href && (href.startsWith('http') || href.startsWith('/')))
         .filter(href =>
           !siteConfig.categories_config.exclude_patterns?.some(p => href.includes(p))
-        );
+            );
       allCategories = Array.from(new Set(allCategories));
       // Normalizar URLs
       allCategories = allCategories.map(href => {
@@ -173,28 +173,30 @@ async function scrapeUrl(browser, url, siteConfig, context) {
           continue;
         }
         
-      } catch (error) {
+    } catch (error) {
         console.log(`[SCRAPER] Error cargando ${nextUrl}: ${error.message}, terminando paginación`);
         nextUrl = null;
         continue;
-      }
-      
+    }
+
       const baseSel = siteConfig.extraction_config.params.schema.baseSelector;
-      try {
+    try {
         await page.waitForSelector(baseSel, { timeout: 2000 }); // Reducido de 3000 a 2000
-      } catch (error) {
+    } catch (error) {
         console.log(`[SCRAPER] No se encontraron productos en ${nextUrl} (timeout), terminando paginación`);
         nextUrl = null;
         continue;
-      }
-      
+    }
+
       // Verificar si hay productos en la página
       const productCount = await page.$$eval(baseSel, els => els.length);
       if (productCount === 0) {
         console.log(`[SCRAPER] Página vacía detectada en ${nextUrl}, terminando paginación`);
         nextUrl = null;
         continue;
-      }
+    }
+
+      console.log(`[SCRAPER] Encontrados ${productCount} productos en página ${pageNum}`);
       
       // Forzar carga de imágenes con scroll individual
       await page.evaluate(async () => {
@@ -219,33 +221,33 @@ async function scrapeUrl(browser, url, siteConfig, context) {
       const products = await page.$$eval(
         baseSel,
         (items, config) => {
-          return items.map(item => {
-            const result = {};
-            for (const field of config.schema.fields) {
-              if (field.type === 'constant') {
-                result[field.name] = field.value;
-              } else if (field.type === 'url_extract') {
-                const match = config.url.match(new RegExp(field.pattern));
-                if (match && match[1]) {
+        return items.map(item => {
+          const result = {};
+          for (const field of config.schema.fields) {
+            if (field.type === 'constant') {
+              result[field.name] = field.value;
+            } else if (field.type === 'url_extract') {
+              const match = config.url.match(new RegExp(field.pattern));
+              if (match && match[1]) {
                   let v = match[1];
                   if (field.transform) v = new Function('data', field.transform)(v);
                   result[field.name] = v;
-                }
-              } else {
+              }
+            } else {
                 const el = item.querySelector(field.selector);
                 if (el) {
-                  if (field.type === 'text') {
+                if (field.type === 'text') {
                     result[field.name] = el.innerText.trim();
-                  } else if (field.type === 'attribute') {
+                } else if (field.type === 'attribute') {
                     let v = el.getAttribute(field.attribute);
                     if (field.transform) v = new Function('data', field.transform)(v);
                     result[field.name] = v;
-                  }
                 }
               }
             }
-            return result;
-          });
+          }
+          return result;
+        });
         },
         { schema: siteConfig.extraction_config.params.schema, url: nextUrl }
       );
@@ -339,7 +341,12 @@ app.post('/scrape', async (req, res) => {
         userAgent: siteConfig.crawler_params.args[0].replace('--user-agent=', '')
       });
       context.on('console', msg => {
-        console.log(`[BROWSER LOG] ${msg.type()}: ${msg.text()}`);
+        // Filtrar logs irrelevantes del bloqueo de recursos
+        const text = msg.text();
+        if (text.includes('net::ERR_FAILED') || text.includes('status of 404')) {
+          return; // No mostrar estos errores normales
+        }
+        console.log(`[BROWSER LOG] ${msg.type()}: ${text}`);
       });
       if (siteConfig.auth_config) {
         const page = await context.newPage();
@@ -367,8 +374,8 @@ app.post('/scrape', async (req, res) => {
         );
         batchResults.forEach(products => allProducts.push(...products));
         console.log(`[PROGRESS] ${siteName}: ${allProducts.length} products scraped (${Math.round((i + batch.length) / urls.length * 100)}%)`);
-      }
-      await browser.close();
+  }
+  await browser.close();
       results[siteName] = {
         site_name: siteConfig.site_name,
         total_products: allProducts.length,
@@ -409,4 +416,4 @@ app.get('/', (_, res) => res.send('Playwright Scraper API running'));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`[SERVER] Listening on port ${PORT}`);
-}); 
+});
