@@ -159,7 +159,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
           img.naturalHeight > 50 &&
           !img.src.startsWith('data:image/svg+xml')
         );
-      }, { timeout: 10000 }).catch(() => {
+      }, { timeout: 3000 }).catch(() => {
         console.log('[SCRAPER] Timeout esperando imágenes, continuando...');
       });
       
