@@ -47,6 +47,14 @@ async function performLogin(page, authConfig) {
 async function discoverCategories(browser, siteConfig) {
   console.log(`[DISCOVERY] Finding categories for ${siteConfig.site_name}`);
   const page = await browser.newPage();
+  
+  // Bloquear recursos pesados para acelerar descubrimiento
+  await page.route('**/*', (route) => {
+    return ['image', 'stylesheet', 'font', 'media'].includes(route.request().resourceType())
+      ? route.abort()
+      : route.continue();
+  });
+  
   if (siteConfig.auth_config) {
     await performLogin(page, siteConfig.auth_config);
   }
@@ -87,7 +95,15 @@ async function discoverCategories(browser, siteConfig) {
           visited.add(nextPageUrl);
           allPages.push(nextPageUrl);
           try {
-            await page.goto(nextPageUrl, { waitUntil: 'networkidle', timeout: 10000 });
+            const response = await page.goto(nextPageUrl, { waitUntil: 'networkidle', timeout: 10000 });
+            
+            // Detectar 404 inmediatamente
+            if (response && response.status() === 404) {
+              console.log(`[DISCOVERY][${catUrl}] Página 404 detectada: ${nextPageUrl}, terminando paginación`);
+              nextPageUrl = null;
+              break;
+            }
+            
             await page.waitForTimeout(700);
             const screenshotPath = `screenshots/pagination_${encodeURIComponent(nextPageUrl)}.png`;
             await page.screenshot({ path: screenshotPath });
@@ -134,14 +150,51 @@ async function scrapeUrl(browser, url, siteConfig, context) {
   try {
     page = await context.newPage();
     await page.setViewportSize(siteConfig.crawler_params.defaultViewport);
+    
+    // Bloquear recursos pesados para acelerar carga
+    await page.route('**/*', (route) => {
+      return ['image', 'stylesheet', 'font', 'media'].includes(route.request().resourceType())
+        ? route.abort()
+        : route.continue();
+    });
+    
     let nextUrl = url;
     let pageNum = 1;
     const results = [];
     while (nextUrl) {
       console.log(`[SCRAPER] Page ${pageNum} → ${nextUrl}`);
-      await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });
+      try {
+        const response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 4000 });
+        
+        // Detectar 404 inmediatamente
+        if (response && response.status() === 404) {
+          console.log(`[SCRAPER] Página 404 detectada: ${nextUrl}, terminando paginación`);
+          nextUrl = null;
+          continue;
+        }
+        
+      } catch (error) {
+        console.log(`[SCRAPER] Error cargando ${nextUrl}: ${error.message}, terminando paginación`);
+        nextUrl = null;
+        continue;
+      }
+      
       const baseSel = siteConfig.extraction_config.params.schema.baseSelector;
-      await page.waitForSelector(baseSel, { timeout: 5000 });
+      try {
+        await page.waitForSelector(baseSel, { timeout: 2000 }); // Reducido de 3000 a 2000
+      } catch (error) {
+        console.log(`[SCRAPER] No se encontraron productos en ${nextUrl} (timeout), terminando paginación`);
+        nextUrl = null;
+        continue;
+      }
+      
+      // Verificar si hay productos en la página
+      const productCount = await page.$$eval(baseSel, els => els.length);
+      if (productCount === 0) {
+        console.log(`[SCRAPER] Página vacía detectada en ${nextUrl}, terminando paginación`);
+        nextUrl = null;
+        continue;
+      }
       
       // Forzar carga de imágenes con scroll individual
       await page.evaluate(async () => {
