@@ -38,8 +38,12 @@
         "height": 800
       },   
       "args": [
-        "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
-      ]
+        "--user-agent=Mozilla/5.0 ...",
+        "--disable-extensions",
+        "--disable-dev-shm-usage",
+        "--no-sandbox",
+        "--disable-gpu"
+    ]
     },
     "pagination": {
         "selector": "a.next.page-number",
@@ -47,26 +51,10 @@
         "max_pages": 100
     }, 
     "pre_actions": [
-      {
-        "type": "waitForLoadState",
-        "state": "domcontentloaded"
-      },
-      {
-        "type": "waitForLoadState",
-        "state": "networkidle"
-      },
-      {
-        "type": "waitForSelector",
-        "selector": "div.product-small.col.has-hover.product",
-        "timeout": 20000
-      }
+        { "type": "waitForLoadState", "state": "domcontentloaded" },
+        { "type": "waitForSelector", "selector": "div.product-small.col.has-hover.product", "timeout": 10000 }
     ],
-    "post_actions": [
-      {
-        "type": "screenshot",
-        "path": "debug_after-products.png"
-      }
-    ],
+    "post_actions": [],
     "extraction_config": {
       "type": "json_css",
       "params": {
@@ -130,7 +118,7 @@
       }
     },
     "cache_mode": "bypass",
-    "semaphore_count": 4,
+    "semaphore_count": 6,
     "verbose": true
   }
   
