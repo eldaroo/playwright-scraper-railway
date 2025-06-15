@@ -130,7 +130,7 @@
       }
     },
     "cache_mode": "bypass",
-    "semaphore_count": 2,
+    "semaphore_count": 4,
     "verbose": true
   }
   

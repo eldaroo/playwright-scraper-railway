@@ -139,16 +139,16 @@ async function scrapeUrl(browser, url, siteConfig, context) {
     const results = [];
     while (nextUrl) {
       console.log(`[SCRAPER] Page ${pageNum} → ${nextUrl}`);
-      await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
       const baseSel = siteConfig.extraction_config.params.schema.baseSelector;
-      await page.waitForSelector(baseSel, { timeout: 20000 });
+      await page.waitForSelector(baseSel, { timeout: 10000 });
       
       // Forzar carga de imágenes con scroll individual
       await page.evaluate(async () => {
         const imgs = Array.from(document.querySelectorAll('div.box-image img'));
         for (const img of imgs) {
           img.scrollIntoView({ behavior: 'instant', block: 'center' });
-          await new Promise(r => setTimeout(r, 150)); // da tiempo a cargar
+          await new Promise(r => setTimeout(r, 100)); // reducido de 150ms a 100ms
         }
       });
 
@@ -159,7 +159,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
           img.naturalHeight > 50 &&
           !img.src.startsWith('data:image/svg+xml')
         );
-      }, { timeout: 3000 }).catch(() => {
+      }, { timeout: 1000 }).catch(() => {
         console.log('[SCRAPER] Timeout esperando imágenes, continuando...');
       });
       
@@ -218,7 +218,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
             nextUrl = resolved;
             pageNum++;
             foundNext = true;
-            await page.waitForTimeout(500);
+            await page.waitForTimeout(200);
           } else {
             console.log('[PAGINATION] El elemento existe pero no tiene href → finalizando paginación');
             nextUrl = null;
@@ -239,7 +239,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
           console.log(`[PAGINATION][fallback] Next encontrado: ${resolved}`);
           nextUrl = resolved;
           pageNum++;
-          await page.waitForTimeout(500);
+          await page.waitForTimeout(200);
         } else {
           console.log('[PAGINATION][fallback] No se encontró botón Next → finalizando paginación');
           nextUrl = null;
