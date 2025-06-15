@@ -87,8 +87,8 @@ async function discoverCategories(browser, siteConfig) {
           visited.add(nextPageUrl);
           allPages.push(nextPageUrl);
           try {
-            await page.goto(nextPageUrl, { waitUntil: 'networkidle', timeout: 30000 });
-            await page.waitForTimeout(1000);
+            await page.goto(nextPageUrl, { waitUntil: 'networkidle', timeout: 10000 });
+            await page.waitForTimeout(700);
             const screenshotPath = `screenshots/pagination_${encodeURIComponent(nextPageUrl)}.png`;
             await page.screenshot({ path: screenshotPath });
             console.log(`[DISCOVERY][${catUrl}] Página ${pageCount}: ${nextPageUrl} (screenshot: ${screenshotPath})`);
@@ -139,9 +139,9 @@ async function scrapeUrl(browser, url, siteConfig, context) {
     const results = [];
     while (nextUrl) {
       console.log(`[SCRAPER] Page ${pageNum} → ${nextUrl}`);
-      await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
+      await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });
       const baseSel = siteConfig.extraction_config.params.schema.baseSelector;
-      await page.waitForSelector(baseSel, { timeout: 10000 });
+      await page.waitForSelector(baseSel, { timeout: 5000 });
       
       // Forzar carga de imágenes con scroll individual
       await page.evaluate(async () => {
@@ -159,7 +159,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
           img.naturalHeight > 50 &&
           !img.src.startsWith('data:image/svg+xml')
         );
-      }, { timeout: 1000 }).catch(() => {
+      }, { timeout: 1500 }).catch(() => {
         console.log('[SCRAPER] Timeout esperando imágenes, continuando...');
       });
       
@@ -218,7 +218,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
             nextUrl = resolved;
             pageNum++;
             foundNext = true;
-            await page.waitForTimeout(200);
+            await page.waitForTimeout(150);
           } else {
             console.log('[PAGINATION] El elemento existe pero no tiene href → finalizando paginación');
             nextUrl = null;
@@ -239,7 +239,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
           console.log(`[PAGINATION][fallback] Next encontrado: ${resolved}`);
           nextUrl = resolved;
           pageNum++;
-          await page.waitForTimeout(200);
+          await page.waitForTimeout(150);
         } else {
           console.log('[PAGINATION][fallback] No se encontró botón Next → finalizando paginación');
           nextUrl = null;
