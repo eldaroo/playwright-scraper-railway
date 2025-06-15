@@ -142,6 +142,27 @@ async function scrapeUrl(browser, url, siteConfig, context) {
       await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
       const baseSel = siteConfig.extraction_config.params.schema.baseSelector;
       await page.waitForSelector(baseSel, { timeout: 20000 });
+      
+      // Forzar carga de imágenes con scroll individual
+      await page.evaluate(async () => {
+        const imgs = Array.from(document.querySelectorAll('div.box-image img'));
+        for (const img of imgs) {
+          img.scrollIntoView({ behavior: 'instant', block: 'center' });
+          await new Promise(r => setTimeout(r, 150)); // da tiempo a cargar
+        }
+      });
+
+      await page.waitForFunction(() => {
+        const imgs = Array.from(document.querySelectorAll('div.box-image img'));
+        return imgs.length > 0 && imgs.every(img =>
+          img.complete &&
+          img.naturalHeight > 50 &&
+          !img.src.startsWith('data:image/svg+xml')
+        );
+      }, { timeout: 10000 }).catch(() => {
+        console.log('[SCRAPER] Timeout esperando imágenes, continuando...');
+      });
+      
       const products = await page.$$eval(
         baseSel,
         (items, config) => {

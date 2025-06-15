@@ -90,7 +90,8 @@
               "name": "image",
               "selector": "div.box-image img",
               "type": "attribute",
-              "attribute": "src"
+              "attribute": "src",
+              "transform": "const val = data || element.getAttribute('data-src'); return val && !val.startsWith('data:image/svg+xml') ? val : null;"
             },
             {
               "name": "url",
@@ -106,8 +107,9 @@
             },
             {
               "name": "category",
-              "type": "constant",
-              "value": "Casa Mami"
+              "selector": "p.category.uppercase.is-smaller.no-text-overflow.product-cat.op-7",
+              "type": "text",
+              "transform": "if (data.trim().toLowerCase() === 'todos' || data.trim() === '//TODOS//') { try { const m = url.match(/categoria-producto\\/([^\\/]+)/i); return m ? m[1].replace(/-/g, ' ') : 'desconocido'; } catch { return 'desconocido'; } } return data.trim();"
             },
             {
               "name": "source_url",

@@ -28,3 +28,23 @@
       }
     }
   } 
+
+  await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  const baseSel = siteConfig.extraction_config.params.schema.baseSelector;
+  await page.waitForSelector(baseSel, { timeout: 20000 });
+  
+  // Esperar a que las imágenes se carguen
+  await page.waitForFunction(() => {
+    const imgs = Array.from(document.querySelectorAll('div.box-image img'));
+    return imgs.length > 0 && imgs.every(img => 
+      img.complete && 
+      img.naturalHeight !== 0 && 
+      !img.src.startsWith('data:image/svg+xml')
+    );
+  }, { timeout: 15000 }).catch(() => {
+    console.log('[SCRAPER] Timeout esperando imágenes, continuando...');
+  });
+  
+  const products = await page.$$eval(
+  // ... existing code ...
+  ); 
