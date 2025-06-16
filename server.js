@@ -29,8 +29,8 @@ async function performLogin(page, authConfig) {
     await page.goto(authConfig.login_url);
     await page.click(authConfig.login_button_selector);
     console.log('[AUTH] Modal de login abierto');
-    await page.waitForSelector(authConfig.form_selectors.username);
-    await page.waitForSelector(authConfig.form_selectors.password);
+    await page.waitForSelector(authConfig.form_selectors.username, { timeout: 10000 });
+    await page.waitForSelector(authConfig.form_selectors.password, { timeout: 10000 });
     await page.fill(authConfig.form_selectors.username, authConfig.credentials.username);
     await page.fill(authConfig.form_selectors.password, authConfig.credentials.password);
     console.log('[AUTH] Credenciales ingresadas');
@@ -39,8 +39,9 @@ async function performLogin(page, authConfig) {
     console.log('[AUTH] Login exitoso');
     return true;
   } catch (error) {
-    console.error('[AUTH] Error en el proceso de login:', error);
-    throw new Error(`Fallo en el proceso de login: ${error.message}`);
+    console.error('[AUTH] Error en el proceso de login:', error.message);
+    // No lanzar error, solo retornar false para continuar sin login
+    return false;
   }
 }
 
@@ -56,7 +57,12 @@ async function discoverCategories(browser, siteConfig) {
   });
 
   if (siteConfig.auth_config) {
-    await performLogin(page, siteConfig.auth_config);
+    const page = await browser.newPage();
+    const loginSuccess = await performLogin(page, siteConfig.auth_config);
+    if (!loginSuccess) {
+      console.log('[AUTH] Login falló, continuando sin autenticación...');
+    }
+    await page.close();
   }
   try {
     // Si hay categories_config, usar lógica dinámica
@@ -173,11 +179,28 @@ async function scrapeUrl(browser, url, siteConfig, context) {
           continue;
         }
         
-    } catch (error) {
+        // Detectar si necesita login (página redirige a login)
+        if (response && response.url().includes('/mi-cuenta/') && !nextUrl.includes('/mi-cuenta/')) {
+          console.log(`[SCRAPER] Sesión expirada detectada, intentando re-login...`);
+          if (siteConfig.auth_config) {
+            const loginSuccess = await performLogin(page, siteConfig.auth_config);
+            if (loginSuccess) {
+              // Reintentar la página original
+              const retryResponse = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });
+              if (retryResponse && retryResponse.status() === 404) {
+                console.log(`[SCRAPER] Página 404 después de re-login: ${nextUrl}, terminando paginación`);
+                nextUrl = null;
+                continue;
+              }
+            }
+          }
+        }
+        
+      } catch (error) {
         console.log(`[SCRAPER] Error cargando ${nextUrl}: ${error.message}, terminando paginación`);
         nextUrl = null;
         continue;
-    }
+      }
 
       const baseSel = siteConfig.extraction_config.params.schema.baseSelector;
     try {
@@ -350,7 +373,10 @@ app.post('/scrape', async (req, res) => {
       });
       if (siteConfig.auth_config) {
         const page = await context.newPage();
-        await performLogin(page, siteConfig.auth_config);
+        const loginSuccess = await performLogin(page, siteConfig.auth_config);
+        if (!loginSuccess) {
+          console.log('[AUTH] Login falló, continuando sin autenticación...');
+        }
         await page.close();
       }
       // Descubrir categorías/URLs
