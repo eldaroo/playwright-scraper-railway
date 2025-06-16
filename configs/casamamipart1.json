@@ -14,7 +14,6 @@
       "https://casamami.com.ar/categor%C3%ADa-producto/aros/aros-por-par/",
       "https://casamami.com.ar/categor%C3%ADa-producto/aros/trepadores/",
       "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/esenciales/",
-      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/todos-bijouterie/",
       "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/broches/",
       "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/choker/",
       "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/cintos/",
@@ -140,9 +139,9 @@
             },
             {
               "name": "category",
-              "selector": "p.category.uppercase.is-smaller.no-text-overflow.product-cat.op-7",
-              "type": "text",
-              "transform": "if (data.trim().toLowerCase() === 'todos' || data.trim() === '//TODOS//') { try { const m = url.match(/categoria-producto\\/([^\\/]+)/i); return m ? m[1].replace(/-/g, ' ') : 'desconocido'; } catch { return 'desconocido'; } } return data.trim();"
+              "type": "url_extract",
+              "pattern": "categor%C3%ADa-producto/[^/]+/([^/]+)",
+              "transform": "return data.replace(/-/g, ' ');"
             },
             {
               "name": "source_url",
@@ -163,7 +162,7 @@
       }
     },
     "cache_mode": "bypass",
-    "semaphore_count": 6,
+    "semaphore_count": 3,
     "verbose": true
   }
   

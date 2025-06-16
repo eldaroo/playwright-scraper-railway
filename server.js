@@ -426,13 +426,33 @@ app.post('/scrape', async (req, res) => {
       console.log(`[SCRAPER] Found ${urls.length} URLs for ${siteConfig.site_name}`);
       const allProducts = [];
       const batchSize = siteConfig.semaphore_count || 2;
-      for (let i = 0; i < urls.length; i += batchSize) {
-        const batch = urls.slice(i, i + batchSize);
-        const batchResults = await Promise.all(
-          batch.map(url => scrapeUrl(browser, url, siteConfig, context))
-        );
-        batchResults.forEach(products => allProducts.push(...products));
-        console.log(`[PROGRESS] ${siteName}: ${allProducts.length} products scraped (${Math.round((i + batch.length) / urls.length * 100)}%)`);
+      
+      try {
+        for (let i = 0; i < urls.length; i += batchSize) {
+          const batch = urls.slice(i, i + batchSize);
+          console.log(`[BATCH] Processing batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(urls.length/batchSize)} (${batch.length} URLs)`);
+          
+          const batchResults = await Promise.allSettled(
+            batch.map(url => scrapeUrl(browser, url, siteConfig, context))
+          );
+          
+          batchResults.forEach((result, index) => {
+            if (result.status === 'fulfilled') {
+              allProducts.push(...result.value);
+            } else {
+              console.error(`[ERROR] Failed to scrape ${batch[index]}: ${result.reason}`);
+            }
+          });
+          
+          console.log(`[PROGRESS] ${siteName}: ${allProducts.length} products scraped (${Math.round((i + batch.length) / urls.length * 100)}%)`);
+          
+          // Pequeña pausa entre batches para evitar sobrecarga
+          if (i + batchSize < urls.length) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+      } catch (error) {
+        console.error(`[ERROR] Error processing batches for ${siteName}:`, error.message);
       }
       
       await browser.close();
