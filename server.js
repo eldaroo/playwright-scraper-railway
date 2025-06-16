@@ -157,7 +157,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
     page = await context.newPage();
     await page.setViewportSize(siteConfig.crawler_params.defaultViewport);
     
-    // Bloquear recursos pesados para acelerar carga
+    // Bloquear recursos pesados para acelerar carga (pero permitir JS)
     await page.route('**/*', (route) => {
       return ['image', 'stylesheet', 'font', 'media'].includes(route.request().resourceType())
         ? route.abort()
@@ -203,21 +203,52 @@ async function scrapeUrl(browser, url, siteConfig, context) {
       }
 
       const baseSel = siteConfig.extraction_config.params.schema.baseSelector;
-    try {
-        await page.waitForSelector(baseSel, { timeout: 5000 }); // Reducido de 3000 a 2000
-    } catch (error) {
-        console.log(`[SCRAPER] No se encontraron productos en ${nextUrl} (timeout), terminando paginación`);
-        nextUrl = null;
-        continue;
-    }
+      try {
+        await page.waitForSelector(baseSel, { timeout: 8000 }); // Aumentado de 5000 a 8000
+      } catch (error) {
+        // Retry con scroll para activar lazy loading
+        console.log(`[SCRAPER] Primer intento falló, intentando con scroll...`);
+        try {
+          await page.evaluate(() => {
+            window.scrollTo(0, document.body.scrollHeight / 2);
+          });
+          await page.waitForTimeout(2000);
+          await page.waitForSelector(baseSel, { timeout: 5000 });
+          console.log(`[SCRAPER] Productos encontrados después del scroll`);
+        } catch (retryError) {
+          console.log(`[SCRAPER] No se encontraron productos en ${nextUrl} (timeout + retry), terminando paginación`);
+          nextUrl = null;
+          continue;
+        }
+      }
 
       // Verificar si hay productos en la página
       const productCount = await page.$$eval(baseSel, els => els.length);
       if (productCount === 0) {
-        console.log(`[SCRAPER] Página vacía detectada en ${nextUrl}, terminando paginación`);
-        nextUrl = null;
-        continue;
-    }
+        // Verificar selectores alternativos comunes antes de dar up
+        const altSelectors = [
+          'div.product',
+          'article.product',
+          '.woocommerce-loop-product',
+          '.product-item'
+        ];
+        
+        let foundAlt = false;
+        for (const altSel of altSelectors) {
+          const altCount = await page.$$eval(altSel, els => els.length).catch(() => 0);
+          if (altCount > 0) {
+            console.log(`[SCRAPER] Productos encontrados con selector alternativo: ${altSel} (${altCount} productos)`);
+            foundAlt = true;
+            break;
+          }
+        }
+        
+        if (!foundAlt) {
+          console.log(`[SCRAPER] Página vacía detectada en ${nextUrl}, terminando paginación`);
+          nextUrl = null;
+          continue;
+        }
+      }
 
       console.log(`[SCRAPER] Encontrados ${productCount} productos en página ${pageNum}`);
       
@@ -260,10 +291,12 @@ async function scrapeUrl(browser, url, siteConfig, context) {
                 const el = item.querySelector(field.selector);
                 if (el) {
                 if (field.type === 'text') {
-                    result[field.name] = el.innerText.trim();
+                    let v = el.innerText.trim();
+                    if (field.transform) v = new Function('data', 'url', 'element', field.transform)(v, config.url, el);
+                    result[field.name] = v;
                 } else if (field.type === 'attribute') {
                     let v = el.getAttribute(field.attribute);
-                    if (field.transform) v = new Function('data', field.transform)(v);
+                    if (field.transform) v = new Function('data', 'url', 'element', field.transform)(v, config.url, el);
                     result[field.name] = v;
                 }
               }
@@ -400,8 +433,9 @@ app.post('/scrape', async (req, res) => {
         );
         batchResults.forEach(products => allProducts.push(...products));
         console.log(`[PROGRESS] ${siteName}: ${allProducts.length} products scraped (${Math.round((i + batch.length) / urls.length * 100)}%)`);
-  }
-  await browser.close();
+      }
+      
+      await browser.close();
       results[siteName] = {
         site_name: siteConfig.site_name,
         total_products: allProducts.length,
