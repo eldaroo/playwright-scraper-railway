@@ -2,9 +2,21 @@ import express from 'express';
 import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 const app = express();
 app.use(express.json());
+
+// Store de jobs en memoria (en producción usarías Redis o DB)
+const jobs = new Map();
+
+// Estados posibles de un job
+const JobStatus = {
+  PENDING: 'pending',
+  RUNNING: 'running', 
+  COMPLETED: 'completed',
+  FAILED: 'failed'
+};
 
 if (!fs.existsSync('./screenshots')) {
   fs.mkdirSync('./screenshots');
@@ -355,7 +367,225 @@ async function scrapeUrl(browser, url, siteConfig, context) {
   }
 }
 
+// Crear un nuevo job de scraping (asíncrono)
 app.post('/scrape', async (req, res) => {
+  try {
+    if (!req.body.sites || !Array.isArray(req.body.sites)) {
+      return res.status(400).json({
+        success: false,
+        error: 'El campo "sites" es requerido y debe ser un array',
+        example: { sites: ["fancyyou"] }
+      });
+    }
+
+    const jobId = uuidv4();
+    const job = {
+      id: jobId,
+      status: JobStatus.PENDING,
+      sites: req.body.sites,
+      created_at: new Date().toISOString(),
+      started_at: null,
+      completed_at: null,
+      progress: {
+        current_site: null,
+        current_site_index: 0,
+        total_sites: req.body.sites.length,
+        current_url: null,
+        current_url_index: 0,
+        total_urls: 0,
+        products_scraped: 0
+      },
+      results: {},
+      error: null
+    };
+
+    jobs.set(jobId, job);
+
+    // Iniciar el scraping en background
+    runScrapingJob(jobId).catch(error => {
+      const job = jobs.get(jobId);
+      if (job) {
+        job.status = JobStatus.FAILED;
+        job.error = error.message;
+        job.completed_at = new Date().toISOString();
+      }
+    });
+
+    res.json({
+      success: true,
+      job_id: jobId,
+      status: JobStatus.PENDING,
+      message: 'Scraping job iniciado. Use GET /status/:jobId para consultar el progreso.'
+    });
+
+  } catch (error) {
+    console.error('[ERROR] Error creando job:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Consultar estado de un job
+app.get('/status/:jobId', (req, res) => {
+  const job = jobs.get(req.params.jobId);
+  
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      error: 'Job no encontrado'
+    });
+  }
+
+  res.json({
+    success: true,
+    job_id: job.id,
+    status: job.status,
+    progress: job.progress,
+    created_at: job.created_at,
+    started_at: job.started_at,
+    completed_at: job.completed_at,
+    results: job.status === JobStatus.COMPLETED ? job.results : null,
+    error: job.error
+  });
+});
+
+// Listar todos los jobs
+app.get('/jobs', (req, res) => {
+  const allJobs = Array.from(jobs.values()).map(job => ({
+    id: job.id,
+    status: job.status,
+    sites: job.sites,
+    created_at: job.created_at,
+    progress: job.progress
+  }));
+
+  res.json({
+    success: true,
+    jobs: allJobs
+  });
+});
+
+// Función principal de scraping que se ejecuta en background
+async function runScrapingJob(jobId) {
+  const job = jobs.get(jobId);
+  if (!job) return;
+
+  job.status = JobStatus.RUNNING;
+  job.started_at = new Date().toISOString();
+
+  const siteConfigs = Object.fromEntries(
+    Object.entries(loadSiteConfigs())
+      .filter(([key]) => job.sites.includes(key))
+  );
+
+  if (Object.keys(siteConfigs).length === 0) {
+    throw new Error('Ninguno de los sitios solicitados existe');
+  }
+
+  let siteIndex = 0;
+  for (const [siteName, siteConfig] of Object.entries(siteConfigs)) {
+    job.progress.current_site = siteName;
+    job.progress.current_site_index = siteIndex;
+    
+    console.log(`[JOB ${jobId}] Processing site: ${siteConfig.site_name}`);
+    
+    // ... resto del código de scraping se mantiene igual pero actualiza el progreso
+    await runSiteScraping(jobId, siteName, siteConfig);
+    siteIndex++;
+  }
+
+  job.status = JobStatus.COMPLETED;
+  job.completed_at = new Date().toISOString();
+}
+
+// Función para scrapear un sitio específico con actualización de progreso
+async function runSiteScraping(jobId, siteName, siteConfig) {
+  const job = jobs.get(jobId);
+  if (!job) return;
+
+  const browser = await chromium.launch({
+    headless: siteConfig.crawler_params.headless
+  });
+  
+  const context = await browser.newContext({
+    viewport: siteConfig.crawler_params.defaultViewport,
+    userAgent: siteConfig.crawler_params.args[0].replace('--user-agent=', '')
+  });
+
+  try {
+    // Login si es necesario
+    if (siteConfig.auth_config) {
+      const page = await context.newPage();
+      const loginSuccess = await performLogin(page, siteConfig.auth_config);
+      if (!loginSuccess) {
+        console.log('[AUTH] Login falló, continuando sin autenticación...');
+      }
+      await page.close();
+    }
+
+    // Obtener URLs
+    let urls;
+    if (siteConfig.use_predefined_urls && siteConfig.urls) {
+      urls = siteConfig.urls;
+    } else if (siteConfig.categories_config) {
+      urls = await discoverCategories(browser, siteConfig);
+    } else {
+      throw new Error('No se pudo determinar cómo obtener las URLs para ' + siteName);
+    }
+
+    job.progress.total_urls = urls.length;
+    console.log(`[JOB ${jobId}] Found ${urls.length} URLs for ${siteConfig.site_name}`);
+
+    const allProducts = [];
+    const batchSize = siteConfig.semaphore_count || 2;
+    
+    for (let i = 0; i < urls.length; i += batchSize) {
+      const batch = urls.slice(i, i + batchSize);
+      job.progress.current_url_index = i;
+      
+      const batchResults = await Promise.allSettled(
+        batch.map(url => {
+          job.progress.current_url = url;
+          return scrapeUrl(browser, url, siteConfig, context);
+        })
+      );
+      
+      batchResults.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          allProducts.push(...result.value);
+          job.progress.products_scraped = allProducts.length;
+        } else {
+          console.error(`[JOB ${jobId}] Failed to scrape ${batch[index]}: ${result.reason}`);
+        }
+      });
+      
+      // Delay entre batches
+      const delay = siteConfig.request_delay || 500;
+      if (i + batchSize < urls.length) {
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+
+    job.results[siteName] = {
+      site_name: siteConfig.site_name,
+      total_products: allProducts.length,
+      products: allProducts,
+      scraping_config: {
+        total_urls: urls.length,
+        schema_name: siteConfig.extraction_config.params.schema.name,
+        headless: siteConfig.crawler_params.headless
+      }
+    };
+
+  } finally {
+    await browser.close();
+  }
+}
+
+// Endpoint legacy (síncrono) para compatibilidad
+app.post('/scrape-sync', async (req, res) => {
   try {
     if (!req.body.sites || !Array.isArray(req.body.sites)) {
       return res.status(400).json({
