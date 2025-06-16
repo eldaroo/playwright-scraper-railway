@@ -1,0 +1,101 @@
+{
+  "site_name": "Casa Mami Fast",
+  "base_url": "https://casamami.com.ar",
+  "use_predefined_urls": true,
+  "urls": [
+    "https://casamami.com.ar/categor%C3%ADa-producto/aros/aros-abridores/",
+    "https://casamami.com.ar/categor%C3%ADa-producto/aros/aros-de-fantasia/",
+    "https://casamami.com.ar/categor%C3%ADa-producto/dijes/flores/",
+    "https://casamami.com.ar/categor%C3%ADa-producto/dijes/futbol/",
+    "https://casamami.com.ar/categor%C3%ADa-producto/cadenas/",
+    "https://casamami.com.ar/categor%C3%ADa-producto/anillos/anillos-de-fantasia/",
+    "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/llaveros/",
+    "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/cintos/"
+  ],
+  "auth_config": {
+    "login_url": "https://casamami.com.ar/mi-cuenta/",
+    "login_button_selector": "a[title='Acceder']",
+    "form_selectors": {
+      "username": "#username",
+      "password": "#password"
+    },
+    "submit_button": ".woocommerce-form-login__submit",
+    "credentials": {
+      "username": "darioegea@gmail.com",
+      "password": "Dariowinner_90"
+    },
+    "success_check": {
+      "selector": "a[href*='mi-cuenta'], .woocommerce-MyAccount-content",
+      "timeout": 20000
+    }
+  },
+  "crawler_params": {
+    "headless": true,
+    "defaultViewport": {
+      "width": 1280,
+      "height": 800
+    },   
+    "args": [
+      "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      "--disable-extensions",
+      "--disable-dev-shm-usage",
+      "--no-sandbox",
+      "--disable-gpu"
+    ]
+  },
+  "pagination": {
+    "selector": "a.next.page-number",
+    "attribute": "href",
+    "max_pages": 50
+  }, 
+  "pre_actions": [
+    { "type": "waitForLoadState", "state": "domcontentloaded" },
+    { "type": "waitForSelector", "selector": "div.product-small.col.has-hover.product", "timeout": 3000 }
+  ],
+  "post_actions": [],
+  "extraction_config": {
+    "type": "json_css",
+    "params": {
+      "schema": {
+        "name": "Casa Mami Fast",
+        "baseSelector": "div.product-small.col.has-hover.product",
+        "fields": [
+          {
+            "name": "title",
+            "selector": "p.name.product-title.woocommerce-loop-product__title a",
+            "type": "text"
+          },
+          {
+            "name": "price",
+            "selector": "div.price-wrapper span.price",
+            "type": "text",
+            "transform": "if (!data) return null; const m=data.match(/([\\d\\.]+,[\\d]+)/g); return m ? m.pop() : data;"
+          },
+          {
+            "name": "image",
+            "selector": "div.box-image img",
+            "type": "attribute",
+            "attribute": "src",
+            "transform": "const val = data || element.getAttribute('data-src'); return val && !val.startsWith('data:image/svg+xml') ? val : null;"
+          },
+          {
+            "name": "url",
+            "selector": "p.name.product-title.woocommerce-loop-product__title a",
+            "type": "attribute",
+            "attribute": "href"
+          },
+          {
+            "name": "category",
+            "type": "url_extract",
+            "pattern": "categor%C3%ADa-producto/[^/]+/([^/]+)",
+            "transform": "return data.replace(/-/g, ' ');"
+          }
+        ]
+      }
+    }
+  },
+  "cache_mode": "bypass",
+  "semaphore_count": 4,
+  "request_delay": 300,
+  "verbose": false
+} 

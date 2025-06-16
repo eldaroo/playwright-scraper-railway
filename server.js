@@ -261,15 +261,12 @@ async function scrapeUrl(browser, url, siteConfig, context) {
         }
       });
 
+      // Espera rápida para imágenes (500ms)
       await page.waitForFunction(() => {
         const imgs = Array.from(document.querySelectorAll('div.box-image img'));
-        return imgs.length > 0 && imgs.every(img =>
-          img.complete &&
-          img.naturalHeight > 50 &&
-          !img.src.startsWith('data:image/svg+xml')
-        );
-      }, { timeout: 2000 }).catch(() => {
-        console.log('[SCRAPER] Timeout esperando imágenes, continuando...');
+        return imgs.length > 0;
+      }, { timeout: 500 }).catch(() => {
+        // Continúa sin esperar imágenes
       });
       
       const products = await page.$$eval(
@@ -317,25 +314,19 @@ async function scrapeUrl(browser, url, siteConfig, context) {
       // Paginación: si hay config.pagination, úsala; si no, intenta Next dinámico
       let foundNext = false;
       if (siteConfig.pagination) {
-        console.log(`[PAGINATION] Buscando siguiente página con selector "${siteConfig.pagination.selector}"`);
         const nextHandle = await page.$(siteConfig.pagination.selector);
-        console.log(`[PAGINATION] nextHandle encontrado?: ${nextHandle !== null}`);
         if (nextHandle) {
           const href = await nextHandle.getAttribute(siteConfig.pagination.attribute);
-          console.log(`[PAGINATION] href obtenido: ${href}`);
           if (href) {
             const resolved = href.startsWith('http') ? href : new URL(href, siteConfig.base_url).href;
-            console.log(`[PAGINATION] URL siguiente resuelta: ${resolved}`);
             nextUrl = resolved;
             pageNum++;
             foundNext = true;
-            await page.waitForTimeout(200);
+            await page.waitForTimeout(50);
           } else {
-            console.log('[PAGINATION] El elemento existe pero no tiene href → finalizando paginación');
             nextUrl = null;
           }
         } else {
-          console.log('[PAGINATION] No hay enlace "Next" → finalizando paginación');
           nextUrl = null;
         }
       }
@@ -347,12 +338,10 @@ async function scrapeUrl(browser, url, siteConfig, context) {
         ).catch(() => null);
         if (nextHref) {
           const resolved = nextHref.startsWith('http') ? nextHref : new URL(nextHref, siteConfig.base_url).href;
-          console.log(`[PAGINATION][fallback] Next encontrado: ${resolved}`);
           nextUrl = resolved;
           pageNum++;
-          await page.waitForTimeout(200);
+          await page.waitForTimeout(50);
         } else {
-          console.log('[PAGINATION][fallback] No se encontró botón Next → finalizando paginación');
           nextUrl = null;
         }
       }
@@ -446,9 +435,10 @@ app.post('/scrape', async (req, res) => {
           
           console.log(`[PROGRESS] ${siteName}: ${allProducts.length} products scraped (${Math.round((i + batch.length) / urls.length * 100)}%)`);
           
-          // Pequeña pausa entre batches para evitar sobrecarga
+          // Delay mínimo entre batches
+          const delay = siteConfig.request_delay || 500;
           if (i + batchSize < urls.length) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, delay));
           }
         }
       } catch (error) {

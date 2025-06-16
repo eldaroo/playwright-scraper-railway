@@ -96,7 +96,7 @@
     }, 
     "pre_actions": [
         { "type": "waitForLoadState", "state": "domcontentloaded" },
-        { "type": "waitForSelector", "selector": "div.product-small.col.has-hover.product", "timeout": 10000 }
+        { "type": "waitForSelector", "selector": "div.product-small.col.has-hover.product", "timeout": 5000 }
     ],
     "post_actions": [],
     "extraction_config": {
@@ -163,6 +163,7 @@
     },
     "cache_mode": "bypass",
     "semaphore_count": 3,
+    "request_delay": 500,
     "verbose": true
   }
   
