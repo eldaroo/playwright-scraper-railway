@@ -1,0 +1,169 @@
+{
+    "site_name": "Casa Mami",
+    "base_url": "https://casamami.com.ar",
+    "use_predefined_urls": true,
+    "urls": [
+      "https://casamami.com.ar/categor%C3%ADa-producto/anillos/anillos-de-acero-quirurgico/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/anillos/anillos-de-fantasia/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/anillos/anillos-macizos-de-acero-quirurgico/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/aros/argollas-por-tira/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/aros/aros-abridores/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/aros/aros-de-fantasia/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/aros/aros-en-blister/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/aros/aros-iman/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/aros/aros-por-par/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/aros/trepadores/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/esenciales/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/todos-bijouterie/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/broches/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/choker/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/cintos/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/colitas/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/collares/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/exhibidores/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/fornituras/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/invisibles/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/llaveros/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/otros-bijouterie/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/set-nena/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/tic-tac/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/bijouterie/vinchas/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/billeteras/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/cadenas/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/carteras/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/corbatas/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/ancla/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/animales/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/arbol-de-vida/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/bandas-de-musica/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/buho/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/calavera/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/frases/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/corazon/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/coronas/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/cruces/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/cumple-15/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/deportes/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/el-principito/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/elefante/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/estrellas-luna-y-piedra/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/familia/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/feminista/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/flores/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/futbol/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/infantiles/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/instrumentos/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/letras/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/libelulas/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/mano-de-fatima-ojos-de-horus-y-ohm/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/mariposas-dijes/",
+      "https://casamami.com.ar/categor%C3%ADa-producto/dijes/nacar/"
+    ],
+    "auth_config": {
+      "login_url": "https://casamami.com.ar/mi-cuenta/",
+      "login_button_selector": "a[title='Acceder']",
+      "form_selectors": {
+        "username": "#username",
+        "password": "#password"
+      },
+      "submit_button": ".woocommerce-form-login__submit",
+      "credentials": {
+        "username": "darioegea@gmail.com",
+        "password": "Dariowinner_90"
+      },
+      "success_check": {
+        "selector": "a[href*='mi-cuenta'], .woocommerce-MyAccount-content",
+        "timeout": 20000
+      }
+    },
+    "crawler_params": {
+      "headless": true,
+      "defaultViewport": {
+        "width": 1280,
+        "height": 800
+      },   
+      "args": [
+        "--user-agent=Mozilla/5.0 ...",
+        "--disable-extensions",
+        "--disable-dev-shm-usage",
+        "--no-sandbox",
+        "--disable-gpu"
+    ]
+    },
+    "pagination": {
+        "selector": "a.next.page-number",
+        "attribute": "href",
+        "max_pages": 100
+    }, 
+    "pre_actions": [
+        { "type": "waitForLoadState", "state": "domcontentloaded" },
+        { "type": "waitForSelector", "selector": "div.product-small.col.has-hover.product", "timeout": 10000 }
+    ],
+    "post_actions": [],
+    "extraction_config": {
+      "type": "json_css",
+      "params": {
+        "schema": {
+          "name": "Casa Mami",
+          "baseSelector": "div.product-small.col.has-hover.product",
+          "fields": [
+            {
+              "name": "title",
+              "selector": "p.name.product-title.woocommerce-loop-product__title a",
+              "type": "text",
+              "transform": "return data.trim();"
+            },
+            {
+              "name": "price",
+              "selector": "div.price-wrapper span.price",
+              "type": "text",
+              "transform": "if (!data) return null; const m=data.match(/([\\d\\.]+,[\\d]+)/g); return m ? m.pop() : data;"
+            },
+            {
+              "name": "image",
+              "selector": "div.box-image img",
+              "type": "attribute",
+              "attribute": "src",
+              "transform": "const val = data || element.getAttribute('data-src'); return val && !val.startsWith('data:image/svg+xml') ? val : null;"
+            },
+            {
+              "name": "url",
+              "selector": "p.name.product-title.woocommerce-loop-product__title a",
+              "type": "attribute",
+              "attribute": "href"
+            },
+            {
+              "name": "status",
+              "selector": ".button.alt.options-vars",
+              "type": "text",
+              "transform": "return data && data.toLowerCase().includes('ver opciones') ? 'in_stock' : 'out_of_stock';"
+            },
+            {
+              "name": "category",
+              "selector": "p.category.uppercase.is-smaller.no-text-overflow.product-cat.op-7",
+              "type": "text",
+              "transform": "if (data.trim().toLowerCase() === 'todos' || data.trim() === '//TODOS//') { try { const m = url.match(/categoria-producto\\/([^\\/]+)/i); return m ? m[1].replace(/-/g, ' ') : 'desconocido'; } catch { return 'desconocido'; } } return data.trim();"
+            },
+            {
+              "name": "source_url",
+              "type": "url"
+            },
+            {
+              "name": "scraped_at",
+              "type": "timestamp"
+            },
+            {
+              "name": "site_name",
+              "type": "constant",
+              "value": "Casa Mami"
+            }
+          ]
+        },
+        "verbose": true
+      }
+    },
+    "cache_mode": "bypass",
+    "semaphore_count": 6,
+    "verbose": true
+  }
+  

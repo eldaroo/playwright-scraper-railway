@@ -104,7 +104,7 @@ async function discoverCategories(browser, siteConfig) {
               break;
             }
             
-            await page.waitForTimeout(700);
+            await page.waitForTimeout(1000);
             const screenshotPath = `screenshots/pagination_${encodeURIComponent(nextPageUrl)}.png`;
             await page.screenshot({ path: screenshotPath });
             console.log(`[DISCOVERY][${catUrl}] Página ${pageCount}: ${nextPageUrl} (screenshot: ${screenshotPath})`);
@@ -164,7 +164,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
     while (nextUrl) {
       console.log(`[SCRAPER] Page ${pageNum} → ${nextUrl}`);
       try {
-        const response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 4000 });
+        const response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });
         
         // Detectar 404 inmediatamente
         if (response && response.status() === 404) {
@@ -181,7 +181,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
 
       const baseSel = siteConfig.extraction_config.params.schema.baseSelector;
     try {
-        await page.waitForSelector(baseSel, { timeout: 2000 }); // Reducido de 3000 a 2000
+        await page.waitForSelector(baseSel, { timeout: 5000 }); // Reducido de 3000 a 2000
     } catch (error) {
         console.log(`[SCRAPER] No se encontraron productos en ${nextUrl} (timeout), terminando paginación`);
         nextUrl = null;
@@ -203,7 +203,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
         const imgs = Array.from(document.querySelectorAll('div.box-image img'));
         for (const img of imgs) {
           img.scrollIntoView({ behavior: 'instant', block: 'center' });
-          await new Promise(r => setTimeout(r, 100)); // reducido de 150ms a 100ms
+          await new Promise(r => setTimeout(r, 300)); // reducido de 150ms a 100ms
         }
       });
 
@@ -214,7 +214,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
           img.naturalHeight > 50 &&
           !img.src.startsWith('data:image/svg+xml')
         );
-      }, { timeout: 1500 }).catch(() => {
+      }, { timeout: 2000 }).catch(() => {
         console.log('[SCRAPER] Timeout esperando imágenes, continuando...');
       });
       
@@ -273,7 +273,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
             nextUrl = resolved;
             pageNum++;
             foundNext = true;
-            await page.waitForTimeout(150);
+            await page.waitForTimeout(200);
           } else {
             console.log('[PAGINATION] El elemento existe pero no tiene href → finalizando paginación');
             nextUrl = null;
@@ -294,7 +294,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
           console.log(`[PAGINATION][fallback] Next encontrado: ${resolved}`);
           nextUrl = resolved;
           pageNum++;
-          await page.waitForTimeout(150);
+          await page.waitForTimeout(200);
         } else {
           console.log('[PAGINATION][fallback] No se encontró botón Next → finalizando paginación');
           nextUrl = null;
