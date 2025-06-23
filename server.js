@@ -491,7 +491,6 @@ async function runScrapingJob(jobId) {
     
     console.log(`[JOB ${jobId}] Processing site: ${siteConfig.site_name}`);
     
-    // ... resto del código de scraping se mantiene igual pero actualiza el progreso
     await runSiteScraping(jobId, siteName, siteConfig);
     siteIndex++;
   }
