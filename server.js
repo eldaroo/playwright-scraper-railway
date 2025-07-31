@@ -39,17 +39,37 @@ async function performLogin(page, authConfig) {
   console.log('[AUTH] Iniciando proceso de login...');
   try {
     await page.goto(authConfig.login_url);
-    await page.click(authConfig.login_button_selector);
-    console.log('[AUTH] Modal de login abierto');
-    await page.waitForSelector(authConfig.form_selectors.username, { timeout: 10000 });
-    await page.waitForSelector(authConfig.form_selectors.password, { timeout: 10000 });
-    await page.fill(authConfig.form_selectors.username, authConfig.credentials.username);
-    await page.fill(authConfig.form_selectors.password, authConfig.credentials.password);
+    
+    // Si hay login_button_selector, hacer click (para modales)
+    console.log('[AUTH] login_button_selector:', authConfig.login_button_selector);
+    if (authConfig.login_button_selector) {
+      await page.click(authConfig.login_button_selector);
+      console.log('[AUTH] Modal de login abierto');
+    }
+    
+    // Esperar y llenar campos según configuración
+    if (authConfig.form_selectors.username) {
+      await page.waitForSelector(authConfig.form_selectors.username, { timeout: 10000 });
+      await page.fill(authConfig.form_selectors.username, authConfig.credentials.username);
+    }
+    
+    if (authConfig.form_selectors.password) {
+      await page.waitForSelector(authConfig.form_selectors.password, { timeout: 10000 });
+      await page.fill(authConfig.form_selectors.password, authConfig.credentials.password);
+    }
+    
     console.log('[AUTH] Credenciales ingresadas');
     await page.click(authConfig.submit_button);
-    await page.waitForSelector(authConfig.success_check.selector, { timeout: authConfig.success_check.timeout });
-    console.log('[AUTH] Login exitoso');
-    return true;
+    
+    // Esperar un poco más para que carguen los productos después del login
+    await page.waitForTimeout(3000);
+    
+              await page.waitForSelector(authConfig.success_check.selector, { timeout: authConfig.success_check.timeout });
+          console.log('[AUTH] Login exitoso');
+          
+          // Esperar un poco más para que la página se estabilice
+          await page.waitForTimeout(2000);
+          return true;
   } catch (error) {
     console.error('[AUTH] Error en el proceso de login:', error.message);
     // No lanzar error, solo retornar false para continuar sin login
@@ -182,7 +202,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
     while (nextUrl) {
       console.log(`[SCRAPER] Page ${pageNum} → ${nextUrl}`);
       try {
-        const response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });
+        const response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
         
         // Detectar 404 inmediatamente
         if (response && response.status() === 404) {
@@ -198,7 +218,7 @@ async function scrapeUrl(browser, url, siteConfig, context) {
             const loginSuccess = await performLogin(page, siteConfig.auth_config);
             if (loginSuccess) {
               // Reintentar la página original
-              const retryResponse = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });
+              const retryResponse = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
               if (retryResponse && retryResponse.status() === 404) {
                 console.log(`[SCRAPER] Página 404 después de re-login: ${nextUrl}, terminando paginación`);
                 nextUrl = null;
@@ -264,57 +284,98 @@ async function scrapeUrl(browser, url, siteConfig, context) {
 
       console.log(`[SCRAPER] Encontrados ${productCount} productos en página ${pageNum}`);
       
-      // Forzar carga de imágenes con scroll individual
-      await page.evaluate(async () => {
-        const imgs = Array.from(document.querySelectorAll('div.box-image img'));
-        for (const img of imgs) {
-          img.scrollIntoView({ behavior: 'instant', block: 'center' });
-          await new Promise(r => setTimeout(r, 300)); // reducido de 150ms a 100ms
-        }
-      });
-
-      // Espera rápida para imágenes (500ms)
-      await page.waitForFunction(() => {
-        const imgs = Array.from(document.querySelectorAll('div.box-image img'));
-        return imgs.length > 0;
-      }, { timeout: 500 }).catch(() => {
-        // Continúa sin esperar imágenes
-      });
+      // Debug: verificar si los elementos existen
+      console.log(`[DEBUG] Product count: ${productCount}`);
+      console.log(`[DEBUG] Base selector: ${baseSel}`);
       
-      const products = await page.$$eval(
-        baseSel,
-        (items, config) => {
-        return items.map(item => {
-          const result = {};
-          for (const field of config.schema.fields) {
-            if (field.type === 'constant') {
-              result[field.name] = field.value;
-            } else if (field.type === 'url_extract') {
-              const match = config.url.match(new RegExp(field.pattern));
-              if (match && match[1]) {
-                  let v = match[1];
-                  if (field.transform) v = new Function('data', field.transform)(v);
-                  result[field.name] = v;
-              }
-            } else {
-                const el = item.querySelector(field.selector);
-                if (el) {
-                if (field.type === 'text') {
-                    let v = el.innerText.trim();
-                    if (field.transform) v = new Function('data', 'url', 'element', field.transform)(v, config.url, el);
-                    result[field.name] = v;
-                } else if (field.type === 'attribute') {
-                    let v = el.getAttribute(field.attribute);
-                    if (field.transform) v = new Function('data', 'url', 'element', field.transform)(v, config.url, el);
-                    result[field.name] = v;
+      if (productCount > 0) {
+        const sampleElement = await page.$(baseSel);
+        if (sampleElement) {
+          const html = await sampleElement.innerHTML();
+          console.log(`[DEBUG] Sample element HTML: ${html.substring(0, 200)}...`);
+        }
+        
+        // Verificar si hay elementos con los selectores específicos
+        const titleElements = await page.$$('h1');
+        const priceElements = await page.$$('strong.caja_precio_noimptk');
+        const imageElements = await page.$$('img.img-responsive');
+        
+        console.log(`[DEBUG] Found ${titleElements.length} h1 elements`);
+        console.log(`[DEBUG] Found ${priceElements.length} price elements`);
+        console.log(`[DEBUG] Found ${imageElements.length} image elements`);
+      } else {
+        console.log(`[DEBUG] No products found with selector: ${baseSel}`);
+        
+        // Verificar si hay elementos similares
+        const allDivs = await page.$$('div');
+        console.log(`[DEBUG] Total div elements: ${allDivs.length}`);
+        
+        const cajaProductoDivs = await page.$$('div[class*="caja_producto"]');
+        console.log(`[DEBUG] Divs with caja_producto in class: ${cajaProductoDivs.length}`);
+      }
+      
+      // Comentado temporalmente para evitar bucle infinito
+      // // Forzar carga de imágenes con scroll individual
+      // await page.evaluate(async () => {
+      //   const imgs = Array.from(document.querySelectorAll('div.box-image img'));
+      //   for (const img of imgs) {
+      //     img.scrollIntoView({ behavior: 'instant', block: 'center' });
+      //     await new Promise(r => setTimeout(r, 300)); // reducido de 150ms a 100ms
+      //   }
+      // });
+
+      // // Espera rápida para imágenes (500ms)
+      // await page.waitForFunction(() => {
+      //   const imgs = Array.from(document.querySelectorAll('div.box-image img'));
+      //   return imgs.length > 0;
+      // }, { timeout: 500 }).catch(() => {
+      //   // Continúa sin esperar imágenes
+      // });
+      
+              const products = await page.$$eval(
+          baseSel,
+          (items, config) => {
+            // Limitar productos si se especifica max_products
+            const maxProducts = config.max_products || items.length;
+            const limitedItems = items.slice(0, maxProducts);
+            
+            console.log(`[DEBUG] Processing ${limitedItems.length} products (limited from ${items.length})`);
+            
+            return limitedItems.map(item => {
+              const result = {};
+              for (const field of config.schema.fields) {
+                if (field.type === 'constant') {
+                  result[field.name] = field.value;
+                } else if (field.type === 'url_extract') {
+                  const match = config.url.match(new RegExp(field.pattern));
+                  if (match && match[1]) {
+                      let v = match[1];
+                      if (field.transform) v = new Function('data', field.transform)(v);
+                      result[field.name] = v;
+                  }
+                } else {
+                    const el = item.querySelector(field.selector);
+                    if (el) {
+                      if (field.type === 'text') {
+                          let v = el.innerText.trim();
+                          if (field.transform) v = new Function('data', 'url', 'element', field.transform)(v, config.url, el);
+                          result[field.name] = v;
+                      } else if (field.type === 'attribute') {
+                          let v = el.getAttribute(field.attribute);
+                          if (field.transform) v = new Function('data', 'url', 'element', field.transform)(v, config.url, el);
+                          result[field.name] = v;
+                      }
+                    }
                 }
               }
-            }
+              return result;
+            });
+          },
+                  { 
+            schema: siteConfig.extraction_config.params.schema, 
+            url: nextUrl,
+            max_products: siteConfig.max_products
           }
-          return result;
-        });
-        },
-        { schema: siteConfig.extraction_config.params.schema, url: nextUrl }
       );
       const enriched = products.map(p => ({
         ...p,
@@ -324,37 +385,45 @@ async function scrapeUrl(browser, url, siteConfig, context) {
       }));
       results.push(...enriched);
       // Paginación: si hay config.pagination, úsala; si no, intenta Next dinámico
-      let foundNext = false;
-      if (siteConfig.pagination) {
-        const nextHandle = await page.$(siteConfig.pagination.selector);
-        if (nextHandle) {
-          const href = await nextHandle.getAttribute(siteConfig.pagination.attribute);
-          if (href) {
-            const resolved = href.startsWith('http') ? href : new URL(href, siteConfig.base_url).href;
+      console.log(`[DEBUG] Checking pagination. pageNum: ${pageNum}, max_pages: ${siteConfig.pagination?.max_pages}`);
+      
+      // Verificar si hemos alcanzado el máximo de páginas
+      if (siteConfig.pagination && siteConfig.pagination.max_pages && pageNum >= siteConfig.pagination.max_pages) {
+        console.log(`[DEBUG] Reached max pages (${siteConfig.pagination.max_pages}), stopping pagination`);
+        nextUrl = null;
+      } else {
+        let foundNext = false;
+        if (siteConfig.pagination && siteConfig.pagination.selector) {
+          const nextHandle = await page.$(siteConfig.pagination.selector);
+          if (nextHandle) {
+            const href = await nextHandle.getAttribute(siteConfig.pagination.attribute);
+            if (href) {
+              const resolved = href.startsWith('http') ? href : new URL(href, siteConfig.base_url).href;
+              nextUrl = resolved;
+              pageNum++;
+              foundNext = true;
+              await page.waitForTimeout(50);
+            } else {
+              nextUrl = null;
+            }
+          } else {
+            nextUrl = null;
+          }
+        }
+        if (!foundNext && !siteConfig.pagination) {
+          // fallback: intentar Next dinámico
+          const nextHref = await page.$eval(
+            'a.next.page-number[aria-label="Next"]',
+            el => el.getAttribute('href'),
+          ).catch(() => null);
+          if (nextHref) {
+            const resolved = nextHref.startsWith('http') ? nextHref : new URL(nextHref, siteConfig.base_url).href;
             nextUrl = resolved;
             pageNum++;
-            foundNext = true;
             await page.waitForTimeout(50);
           } else {
             nextUrl = null;
           }
-        } else {
-          nextUrl = null;
-        }
-      }
-      if (!foundNext && !siteConfig.pagination) {
-        // fallback: intentar Next dinámico
-        const nextHref = await page.$eval(
-          'a.next.page-number[aria-label="Next"]',
-          el => el.getAttribute('href'),
-        ).catch(() => null);
-        if (nextHref) {
-          const resolved = nextHref.startsWith('http') ? nextHref : new URL(nextHref, siteConfig.base_url).href;
-          nextUrl = resolved;
-          pageNum++;
-          await page.waitForTimeout(50);
-        } else {
-          nextUrl = null;
         }
       }
     }

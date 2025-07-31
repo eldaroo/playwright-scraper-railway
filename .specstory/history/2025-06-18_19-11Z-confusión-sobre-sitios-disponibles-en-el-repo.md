@@ -705,3 +705,123 @@ Si necesitas el comportamiento asíncrono, puedes:
 
 ---
 
+_**User**_
+
+pude solucionar eso, pero ahora cuando intento conectarme a la base de datos para brrar los registros y volver a actualizarlos me encuentro con este error
+
+---
+
+_**Assistant**_
+
+Veo que ahora tienes un problema de **timeout de conexión** con Supabase. El error `ETIMEDOUT` indica que la conexión a la base de datos está tardando demasiado o no se puede establecer.
+
+## El Problema
+
+El error muestra:
+- **Error code:** `ETIMEDOUT`
+- **Full message:** `connect ETIMEDOUT 104.18.38.10:443`
+- **URL:** `https://oklhnsamreysnqzufzhd.supabase.co/rest/v1/fancyyou?id=gt.0`
+
+## Posibles Causas
+
+1. **Problema de conectividad** - Tu conexión a internet puede estar lenta
+2. **Supabase sobrecargado** - El servicio puede estar experimentando latencia alta
+3. **Firewall/Proxy** - Alguna restricción de red
+4. **Query muy pesada** - La consulta `id=gt.0` puede estar devolviendo muchos registros
+
+## Soluciones
+
+### 1. Configurar Timeout en n8n
+
+En tu nodo HTTP Request de n8n:
+
+1. Ve a la pestaña **"Settings"**
+2. Busca la opción **"Timeout"** 
+3. Aumenta el valor a **30000** (30 segundos) o más
+4. Activa **"Retry on Fail"** con 3-5 reintentos
+
+### 2. Optimizar la Query
+
+En lugar de borrar todos los registros con `id=gt.0`, considera:
+
+**Opción A: Borrar en lotes**
+```sql
+-- Borrar en lotes de 1000
+DELETE FROM fancyyou WHERE id IN (
+  SELECT id FROM fancyyou ORDER BY id LIMIT 1000
+);
+```
+
+**Opción B: Usar una query más específica**
+```sql
+-- Borrar solo registros antiguos
+DELETE FROM fancyyou WHERE scraped_at < '2025-07-28T00:00:00Z';
+```
+
+### 3. Verificar la Conexión
+
+Puedes probar la conectividad a Supabase:
+
+
+---
+
+```bash
+ping oklhnsamreysnqzufzhd.supabase.co
+```
+
+```
+PS C:\Users\loko_\OneDrive\Desktop\Escritorio\playwright-scraper-railway> ping o
+klhnsamreysnqzufzhd.supab
+ase.co
+                         
+Haciendo ping a oklhnsamreysnqzufzhd.supabase.co [104.18.38.10] con 32 bytes de
+datos:
+
+Estadísticas de ping para 104.18.38.10:
+    Paquetes: enviados = 4, recibidos = 4, perdidos = 0
+    (0% perdidos),
+Tiempos aproximados de ida y vuelta en milisegundos:
+    Mínimo = 71ms, Máximo = 86ms, Media = 80ms
+
+```
+
+---
+
+La conectividad está bien (80ms de latencia). El problema es que la query está tardando demasiado.
+
+### 4. Solución Inmediata
+
+**Cambia tu estrategia de limpieza:**
+
+En lugar de borrar todos los registros de una vez, haz esto en n8n:
+
+1. **Primer nodo HTTP Request** - Obtener solo los IDs:
+   ```
+   GET https://oklhnsamreysnqzufzhd.supabase.co/rest/v1/fancyyou?select=id&limit=1000
+   ```
+
+2. **Segundo nodo HTTP Request** - Borrar por lotes:
+   ```
+   DELETE https://oklhnsamreysnqzufzhd.supabase.co/rest/v1/fancyyou?id=in.(1,2,3,4,5...)
+   ```
+
+### 5. Configuración Recomendada para n8n
+
+En tu nodo HTTP Request:
+
+**Headers:**
+```
+apikey: [tu-api-key]
+Authorization: Bearer [tu-api-key]
+Content-Type: application/json
+```
+
+**Settings:**
+- **Timeout:** 60000 (60 segundos)
+- **Retry on Fail:** Activado con 3 reintentos
+- **Wait Between Retries:** 5000ms
+
+**¿Quieres que te ayude a implementar la solución de borrado por lotes, o prefieres primero aumentar el timeout y activar los reintentos?**
+
+---
+

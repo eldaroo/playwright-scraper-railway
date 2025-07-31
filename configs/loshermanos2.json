@@ -1,0 +1,86 @@
+{
+  "site_name": "Los Hermanos Test",
+  "base_url": "https://www.loshermanos.uno",
+  "use_predefined_urls": true,
+  "urls": [
+    "https://www.loshermanos.uno/catalogo2021.php"
+  ],
+  "auth_config": {
+    "login_url": "https://www.loshermanos.uno",
+    "login_button_selector": null,
+    "form_selectors": {
+      "password": "input[name='clave']"
+    },
+    "submit_button": "input[name='enviar'][value='Ingresar']",
+    "credentials": {
+      "password": "Lh123"
+    },
+    "success_check": {
+      "selector": "div.col-xs-12.caja_producto, body",
+      "timeout": 15000
+    }
+  },
+  "crawler_params": {
+    "headless": true,
+    "defaultViewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "args": [
+      "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+      "--disable-extensions",
+      "--disable-dev-shm-usage",
+      "--no-sandbox",
+      "--disable-gpu"
+    ]
+  },
+  "pre_actions": [
+    { "type": "waitForLoadState", "state": "domcontentloaded" },
+    { "type": "waitForSelector", "selector": "div.col-xs-12.caja_producto", "timeout": 10000 }
+  ],
+  "post_actions": [],
+  "extraction_config": {
+    "type": "json_css",
+    "params": {
+      "schema": {
+        "name": "Los Hermanos Test",
+        "baseSelector": "div.col-xs-12.caja_producto",
+        "fields": [
+          {
+            "name": "title",
+            "selector": "h1",
+            "type": "text"
+          },
+          {
+            "name": "price",
+            "selector": "strong.caja_precio_noimptk",
+            "type": "text"
+          },
+          {
+            "name": "image",
+            "selector": "img.img-responsive",
+            "type": "attribute",
+            "attribute": "src",
+            "transform": "return data ? 'https://www.loshermanos.uno/' + data : null;"
+          },
+          {
+            "name": "site_name",
+            "type": "constant",
+            "value": "Los Hermanos"
+          }
+        ]
+      },
+      "verbose": true
+    }
+  },
+  "pagination": {
+    "selector": null,
+    "attribute": null,
+    "max_pages": 1
+  },
+  "cache_mode": "bypass",
+  "semaphore_count": 3,
+  "request_delay": 1000,
+  "verbose": true,
+  "max_products": 5
+} 
