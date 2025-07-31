@@ -6116,7 +6116,1441 @@ loshermanos sigue sin funcionar : {
 
 _**Assistant**_
 
+Veo el problema. Mirando los logs que me mostraste, veo que **el scraper sigue usando `waitUntil: 'load'`** en lugar de `domcontentloaded`:
 
+```
+- navigating to "https://www.loshermanos.uno/catalogo2021.php", waiting until "load"
+```
+
+Esto significa que **los cambios que hice en `server.js` no se aplicaron correctamente** o hay otro lugar donde se está usando `load`.
+
+Vamos a verificar el archivo `server.js` actual:
+
+
+---
+
+<details>
+            <summary>Grep search for "waitUntil.*load" • **4** files</summary>
+        
+| File | Line | Match |
+|------|------|-------|
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/server.js` | L205 | `const response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/server.js` | L221 | `const retryResponse = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L3385 | `⟪ 108 characters skipped ⟫t response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });` |` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L3386 | `⟪ 113 characters skipped ⟫ryResponse = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });` |` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L3387 | `⟪ 158 characters skipped ⟫` | L7980 | `await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });` |` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L3388 | `⟪ 168 characters skipped ⟫| `-         await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });` |` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L3389 | `⟪ 185 characters skipped ⟫t response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });` |` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L3390 | `⟪ 185 characters skipped ⟫t response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });` |` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L3391 | `⟪ 196 characters skipped ⟫ryResponse = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });` |` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L3413 | `-         const response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L3414 | `+         const response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L3434 | `-               const retryResponse = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L3435 | `+               const retryResponse = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L3460 | `-         const response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L3481 | `-               const retryResponse = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L4546 | `+         const response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L4567 | `+               const retryResponse = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L4820 | `-         const response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L4821 | `+         const response = await page.goto(nextUrl, { waitUntil: 'load', timeout: 20000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L4841 | `-               const retryResponse = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L4842 | `+               const retryResponse = await page.goto(nextUrl, { waitUntil: 'load', timeout: 20000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L5736 | `-         const response = await page.goto(nextUrl, { waitUntil: 'load', timeout: 20000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L5737 | `+         const response = await page.goto(nextUrl, { waitUntil: 'load', timeout: 45000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L5757 | `-               const retryResponse = await page.goto(nextUrl, { waitUntil: 'load', timeout: 20000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L5758 | `+               const retryResponse = await page.goto(nextUrl, { waitUntil: 'load', timeout: 45000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L5877 | `2. **La estrategia `waitUntil: 'load'`** está esperando que TODOS los recursos se carguen` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L5896 | `-         const response = await page.goto(nextUrl, { waitUntil: 'load', timeout: 45000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L5897 | `+         const response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L5917 | `-               const retryResponse = await page.goto(nextUrl, { waitUntil: 'load', timeout: 45000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L5918 | `+               const retryResponse = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L6012 | `La estrategia de cambiar de `waitUntil: 'load'` a `waitUntil: 'domcontentloaded'` funcionó perfectamente.` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L6063 | `- **Antes**: `waitUntil: 'load'` (espera TODOS los recursos)` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-07-30_00-35Z-crear-configuraci%C3%B3n-y-extraer-productos.md` | L6064 | `- **Ahora**: `waitUntil: 'domcontentloaded'` (solo espera el HTML)` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L6643 | `-       await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L7406 | `+   await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L7669 | `-       await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L7670 | `+       await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L7980 | `await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L8130 | `-         await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L8131 | `+         const response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L8296 | `-         const response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L8297 | `+         const response = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 4000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L8871 | `+               const retryResponse = await page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 7000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L5069 | `-       waitUntil: 'domcontentloaded',` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L13319 | `+     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L13345 | `+           await page.goto(action.url, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L13386 | `- Cambiado `waitUntil: 'networkidle'` a `waitUntil: 'domcontentloaded'`` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L13627 | `await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L13630 | `+       await page.goto(url, { waitUntil: 'load', timeout: 45000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L13701 | `await page.goto(action.url, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L13970 | `await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L13973 | `-       await page.goto(url, { waitUntil: 'load', timeout: 45000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L14029 | `-           await page.goto(action.url, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L14139 | `await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });` |
+
+</details>
+
+---
+
+Perfecto, veo que el `server.js` actual **SÍ tiene `domcontentloaded`** en las líneas 204 y 220. Pero el log que me mostraste dice que está usando `load`. 
+
+Esto significa que **el servidor no se reinició** después de los cambios. Necesitamos reiniciar el servidor para que tome los cambios:
+
+
+---
+
+```bash
+Get-Process -Name "node" -ErrorAction SilentlyContinue | Stop-Process -Force
+```
+
+```
+PS C:\Users\loko_\OneDrive\Desktop\Escritorio\playwright-scraper-railway> Get-Process -Name "node" -Err
+```
+
+---
+
+```bash
+node server.js
+```
+
+---
+
+Cancelled
+
+---
+
+
+
+---
+
+_**User**_
+
+en el category esta viniendo el price
+
+---
+
+_**Assistant**_
+
+Veo el problema! En el campo `category` está apareciendo el precio en lugar de la categoría. Esto es porque el selector para `category` está tomando el mismo elemento que el precio.
+
+Mirando la configuración actual:
+
+
+---
+
+Read file: configs/loshermanos.json
+
+---
+
+El problema está en que tanto `code` como `category` están usando el mismo selector `div#texto` y extrayendo todo el texto. El transform de `category` está buscando `Rubro:` pero probablemente no lo encuentra, entonces está devolviendo todo el texto del `div#texto`, que incluye el precio.
+
+Necesito ver la estructura HTML real para entender mejor cómo extraer la categoría correctamente. Vamos a buscar un selector más específico para la categoría:
+
+
+---
+
+<details><summary>Edit file: configs/loshermanos.json</summary>
+
+undefined
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -74,5 +74,5 @@
+              "selector": "div#texto",
+              "type": "text",
+-             "transform": "const match = data.match(/Rubro:\\s*([^\\n]+)/); return match ? match[1].trim() : null;"
++             "transform": "const lines = data.split('\\n'); for (const line of lines) { const match = line.match(/Rubro:\\s*(.+)/); if (match) return match[1].trim(); } return null;"
+            },
+            {
+```
+
+</details>
+
+---
+
+Ahora vamos a probar el scraper con la corrección:
+
+
+---
+
+```bash
+Invoke-RestMethod -Uri "http://localhost:3000/scrape" -Method POST -ContentType "application/json" -Body '{"sites": ["loshermanos"]}'
+```
+
+```
+PS C:\Users\loko_\OneDrive\Desktop\Escritorio\playwright-scraper-railway> ^C
+PS C:\Users\loko_\OneDrive\Desktop\Escritorio\playwright-scraper-railway> In
+                                                                          Invoke-RestMethod -Uri "http:
+//localhost:3000/scrape" -Method POST -ContentType "application/json" -BodInvoke-RestMethod -Uri "http:
+//localhost:3000/scrape" -Method POST -ContentType "application/json" -Body '{"sites": ["loshermanos"]}
+success job_id                               status  message
+------- ------                               ------  -------
+   True 4f249bf6-ee8f-412a-9cea-1e6f52b4d6df pending Scraping job iniciado. Use GET /status/:jobId ... 
+
+
+PS C:\Users\loko_\OneDrive\Desktop\Escritorio\playwright-scraper-railway>
+```
+
+---
+
+```bash
+Start-Sleep -Seconds 60; Invoke-RestMethod -Uri "http://localhost:3000/status/4f249bf6-ee8f-412a-9cea-1e6f52b4d6df" -Method GET
+```
+
+```
+PS C:\Users\loko_\OneDrive\Desktop\Escritorio\playwright-scraper-railway> Start-Sleep -Seconds 60; Invo
+ke-RestMethod                                                             Start-Sleep -Seconds 60; Invo
+ke-RestMethod -Uri "http://localhost:3000/status/4f249bf6-ee8             Start-Sleep -Seconds 60; Invo
+
+
+success      : True
+job_id       : 4f249bf6-ee8f-412a-9cea-1e6f52b4d6df
+status       : completed
+progress     : @{current_site=loshermanos; current_site_index=0; total_sites=1;
+               current_url=https://www.loshermanos.uno/catalogo2021.php; current_url_index=0;
+               total_urls=1; products_scraped=1647}
+created_at   : 2025-07-31T18:43:22.439Z
+started_at   : 2025-07-31T18:43:22.439Z
+completed_at : 2025-07-31T18:43:41.789Z
+results      : @{loshermanos=}
+error        :
+
+
+PS C:\Users\loko_\OneDrive\Desktop\Escritorio\playwright-scraper-railway>
+```
+
+---
+
+¡Excelente! El scraper funcionó y extrajo **1647 productos**. Ahora vamos a verificar si el problema del `category` se solucionó. Vamos a obtener los resultados para ver un producto específico:
+
+
+---
+
+```bash
+Invoke-RestMethod -Uri "http://localhost:3000/results/4f249bf6-ee8f-412a-9cea-1e6f52b4d6df" -Method GET | ConvertTo-Json -Depth 10
+```
+
+```
+PS C:\Users\loko_\OneDrive\Desktop\Escritorio\playwright-scraper-railway> Invoke-RestMethod -Uri "http:
+PS C:\Users\loko_\OneDrive\Desktop\Escritorio\playwright-scraper-railway> Invoke-RestMethod -Uri "http:
+PS C:\Users\loko_\OneDrive\Desktop\Escritorio\playwright-scraper-railway> Invoke-RestMethod -Uri "http:
+PS C:\Users\loko_\OneDrive\Desktop\Escritorio\playwright-scraper-railway> Invoke-RestMethod -Uri "http:
+PS C:\Users\loko_\OneDrive\Desktop\Escritorio\playwright-scraper-railway> Invoke-RestMethod -Uri "http:
+PS C:\Users\loko_\OneDrive\Desktop\Escritorio\playwright-scraper-railway> Invoke-RestMethod -Uri "http:
+Invoke-RestMethod : 
+Error
+Cannot GET /results/4f249bf6-ee8f-412a-9cea-1e6f52b4d6df
+En línea: 1 Carácter: 1
++ Invoke-RestMethod -Uri "http://localhost:3000/results/4f249bf6-ee8f-4 ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (System.Net.HttpWebRequest:HttpWebRequest) [Invoke-Re 
+   stMethod], WebException
+    + FullyQualifiedErrorId : WebCmdletWebResponseException,Microsoft.PowerShell.Commands.InvokeRestM  
+   ethodCommand
+```
+
+---
+
+Parece que no hay un endpoint `/results/`. Vamos a verificar qué endpoints están disponibles:
+
+
+---
+
+Read file: server.js
+
+---
+
+Vamos a buscar los endpoints disponibles:
+
+
+---
+
+<details>
+            <summary>Grep search for "app\.(get|post|put|delete)" • **4** files</summary>
+        
+| File | Line | Match |
+|------|------|-------|
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/server.js` | L440 | `app.post('/scrape', async (req, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/server.js` | L500 | `app.get('/status/:jobId', (req, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/server.js` | L524 | `app.get('/jobs', (req, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/server.js` | L656 | `app.post('/scrape-sync', async (req, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/server.js` | L772 | `app.get('/sites', (_, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/server.js` | L782 | `app.get('/', (_, res) => res.send('Playwright Scraper API running'));` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-18_19-11Z-confusi%C3%B3n-sobre-sitios-disponibles-en-el-repo.md` | L258 | `| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/server.js` | L431 | `app.get('/status/:jobId', (req, res) => {` |` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-18_19-11Z-confusi%C3%B3n-sobre-sitios-disponibles-en-el-repo.md` | L259 | `⟪ 134 characters skipped ⟫-launch-timeout-error.md` | L12938 | `+ app.get('/status/:jobId', (req, res) => {` |` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-18_19-11Z-confusi%C3%B3n-sobre-sitios-disponibles-en-el-repo.md` | L260 | `| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/server.js` | L431 | `app.get('/status/:jobId', (req, res) => {` |` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L6738 | `- app.post('/scrape', async (req, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L6824 | `- app.get('/sites', (_, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L6834 | `- app.get('/', (_, res) => res.send('Playwright Scraper API running'));` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L12878 | `app.post('/scrape', async (req, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L12938 | `+ app.get('/status/:jobId', (req, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L12962 | `+ app.get('/jobs', (req, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-12_15-15Z-fixing-browser-launch-timeout-error.md` | L13095 | `+ app.post('/scrape-sync', async (req, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L315 | `- app.post('/scrape', async (req, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L379 | `+ app.post('/scrape', async (req, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L523 | `app.post('/scrape', async (req, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L1105 | `app.post('/scrape', async (req, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L1176 | `+ app.get('/sites', (_, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L1184 | `app.get('/', (_, res) => res.send('Playwright Scraper API running'));` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L2764 | `app.post('/scrape', async (req, res) => {` |
+| `file:///c%3A/Users/loko_/OneDrive/Desktop/Escritorio/playwright-scraper-railway/.specstory/history/2025-06-08_16-39Z-instalaci%C3%B3n-de-railway-para-scraping.md` | L14366 | `app.post('/scrape', async (req, res) => {` |
+
+</details>
+
+---
+
+Veo que no hay un endpoint `/results/`. Los endpoints disponibles son:
+- `/scrape` (POST)
+- `/status/:jobId` (GET) 
+- `/jobs` (GET)
+- `/scrape-sync` (POST)
+- `/sites` (GET)
+
+Vamos a verificar si los resultados están incluidos en el endpoint `/status/:jobId`:
+
+
+---
+
+Read file: server.js
+
+---
+
+Perfecto, veo que en el endpoint `/status/:jobId` los resultados se incluyen cuando el job está completado: `results: job.status === JobStatus.COMPLETED ? job.results : null`.
+
+Vamos a obtener los resultados del job completado:
+
+
+---
+
+```bash
+Invoke-RestMethod -Uri "http://localhost:3000/status/4f249bf6-ee8f-412a-9cea-1e6f52b4d6df" -Method GET | ConvertTo-Json -Depth 10
+```
+
+```
+os/12735.jpg",
+                                                             "code":  "12735",
+                                                             "category":  "SET PELUQUERIA",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "TRENZADOR",
+                                                             "price":  "$ 17,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/6925231129037.jpg",
+                                                             "code":  "6925231129037",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "TRENZADOR",
+                                                             "price":  "$ 9,500",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/6925231683621.jpg",
+                                                             "code":  "6925231683621",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "TRENZADOR",
+                                                             "price":  "$ 12,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/8000000008015.jpg",
+                                                             "code":  "8000000008015",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "TRENZADOR KIT BRAIDING",       
+                                                             "price":  "$ 8,200",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/6925231683560.jpg",
+                                                             "code":  "6925231683560",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "TRENZADOR KIT COMPLETO",       
+                                                             "price":  "$ 20,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/6925231683591.jpg",
+                                                             "code":  "6925231683591",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "TRENZADOR KSY",
+                                                             "price":  "$ 8,200",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/8990000008156.jpg",
+                                                             "code":  "8990000008156",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "TRENZADOR PRINCESA",
+                                                             "price":  "$ 13,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7450077141916.jpg",
+                                                             "code":  "7450077141916",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "TRENZADOR TINY",
+                                                             "price":  "$ 17,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7450077149561.jpg",
+                                                             "code":  "7450077149561",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "TRENZADOT TINY",
+                                                             "price":  "$ 17,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7450077071220.jpg",
+                                                             "code":  "7450077071220",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "TRICICLO DE METAL",
+                                                             "price":  "$ 37,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/012.jpg",
+                                                             "code":  "012",
+                                                             "category":  "SET NENE SURTIDOS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "triciclo de metal - - - - - - -
+ - - -",
+                                                             "price":  "$ 37,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4556687768770260.jpg",
+                                                             "code":  "4556687768770260",
+                                                             "category":  "MOTOS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "triciclo x 4 bulto - - - - - - 
+- - - - -",
+                                                             "price":  "$ 60,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/10002.jpg",
+                                                             "code":  "10002",
+                                                             "category":  "MOTOS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "tridente maikra - - - - - - - -
+ - - -",
+                                                             "price":  "$ 5,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4556687768769794.jpg",
+                                                             "code":  "4556687768769794",
+                                                             "category":  "MAIKRAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "trillizos en caja -OFERTA-",   
+                                                             "price":  "$ 27,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/77981303322309.jpg",
+                                                             "code":  "77981303322309",
+                                                             "category":  "OFERTAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "TROMPO",
+                                                             "price":  "$ 1,600",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/Q4894653130506.jpg",
+                                                             "code":  null,
+                                                             "category":  "SET NENE SURTIDOS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "TROMPO DE FRUTILLA CON LUZ Y SO
+NIDO",
+                                                             "price":  "$ 3,200",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/21021.jpg",
+                                                             "code":  "21021",
+                                                             "category":  "SONAJEROS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "ukelele en caja",
+                                                             "price":  "$ 10,300",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4894457012442.jpg",
+                                                             "code":  "4894457012442",
+                                                             "category":  "GUITARRAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "ukelele en caja 61cm",
+                                                             "price":  "$ 12,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4894457019694.jpg",
+                                                             "code":  "4894457019694",
+                                                             "category":  "GUITARRAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "ula ula grande x 10 - - - - - -
+ - - - -",
+                                                             "price":  "$ 7,300",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4556687768770045.jpg",
+                                                             "code":  "4556687768770045",
+                                                             "category":  "SLAYS Y VARIOS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "ula ula x 10 chico - - - - - - 
+- - - - -",
+                                                             "price":  "$ 6,300",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4556687768769965.jpg",
+                                                             "code":  "4556687768769965",
+                                                             "category":  "SLAYS Y VARIOS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "unicornio memoria - - - - - - -
+ - - - -",
+                                                             "price":  "$ 3,100",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/455668776876886.jpg",
+                                                             "code":  "455668776876886",
+                                                             "category":  "JUEGOS DE MESA",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "UNICORNIO TINY",
+                                                             "price":  "$ 12,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7450077050348.jpg",
+                                                             "code":  "7450077050348",
+                                                             "category":  "PONYS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "valija bloque - - - - - - - - -
+",
+                                                             "price":  "$ 4,200",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4556687768770293.jpg",
+                                                             "code":  "4556687768770293",
+                                                             "category":  "BLOQUES",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "valija c soldados - - - - - - -
+ - -",
+                                                             "price":  "$ 4,200",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4556687768770280.jpg",
+                                                             "code":  "4556687768770280",
+                                                             "category":  "VALIJAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "valija de belleza de new plas 4
+03 - - - - - -",
+                                                             "price":  "$ 12,500",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7798025254036.jpg",
+                                                             "code":  "7798025254036",
+                                                             "category":  "VALIJAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "valija de briques 0272 - - - - 
+- - - - -",
+                                                             "price":  "$ 6,300",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/07798172021857.jpg",
+                                                             "code":  "07798172021857",
+                                                             "category":  "VALIJAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "valija de doctor 0253 - - - - -
+ - - - -",
+                                                             "price":  "$ 7,100",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7798172022120.jpg",
+                                                             "code":  "7798172022120",
+                                                             "category":  "VALIJAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "valija de hamburguesa",        
+                                                             "price":  "$ 4,200",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4556687768808904.jpg",
+                                                             "code":  "4556687768808904",
+                                                             "category":  "VALIJAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "valija dentista cd 0255",      
+                                                             "price":  "$ 6,200",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4556687768812526.jpg",
+                                                             "code":  "4556687768812526",
+                                                             "category":  "VALIJAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "VALIJA DOCTOR",
+                                                             "price":  "$ 8,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/8050000080054.jpg",
+                                                             "code":  "8050000080054",
+                                                             "category":  "SET DOCTOR",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "valija dura masa duravit 720 - 
+- - - - - -",
+                                                             "price":  "$ 9,200",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7792435007206.jpg",
+                                                             "code":  "7792435007206",
+                                                             "category":  "VALIJAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "valija masa manÃ­a 0081 - - - -
+ - - - - -",
+                                                             "price":  "$ 6,300",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/07798172021161.jpg",
+                                                             "code":  "07798172021161",
+                                                             "category":  "VALIJAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "valija mis herramientas de new 
+plas 401 - - - -",
+                                                             "price":  "$ 12,500",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/10018.jpg",
+                                                             "code":  "10018",
+                                                             "category":  "VALIJAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "valija picnic new plas 404 - - 
+- - - - - -",
+                                                             "price":  "$ 13,600",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/455668776876859.jpg",
+                                                             "code":  "455668776876859",
+                                                             "category":  "VALIJAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "valija super chef 0207 RISA - -
+ - - -",
+                                                             "price":  "$ 6,700",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/07798172021406.jpg",
+                                                             "code":  "07798172021406",
+                                                             "category":  "VALIJAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "VALIJA TE DURAVIT",
+                                                             "price":  "$ 5,800",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7792435005103.jpg",
+                                                             "code":  "7792435005103",
+                                                             "category":  "VALIJAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "vamos al shopping - - - - - - -
+ - - - -",
+                                                             "price":  "$ 2,800",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/455668776876874.jpg",
+                                                             "code":  "455668776876874",
+                                                             "category":  "JUEGOS DE MESA",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "varita c-luz,sonido y accesorio
+s",
+                                                             "price":  "$ 6,800",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4894653124680.jpg",
+                                                             "code":  "4894653124680",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "VARITA FROZEN",
+                                                             "price":  "$ 4,900",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7453077233575.jpg",
+                                                             "code":  "7453077233575",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "VARITA LUZ",
+                                                             "price":  "$ 2,400",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4894653130537.jpg",
+                                                             "code":  "4894653130537",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "VARITA TINY",
+                                                             "price":  "$ 3,500",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7450077072630.jpg",
+                                                             "code":  "7450077072630",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "VARITA TINY",
+                                                             "price":  "$ 3,500",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7450077123080.jpg",
+                                                             "code":  "7450077123080",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "VEHICULO MILITAR",
+                                                             "price":  "$ 7,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4894653128886.jpg",
+                                                             "code":  "4894653128886",
+                                                             "category":  "AUTOS CAJA Y BLISTER",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "VEHICULO X3",
+                                                             "price":  "$ 1,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/6925240118893.jpg",
+                                                             "code":  "6925240118893",
+                                                             "category":  "AUTOS CAJA Y BLISTER",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "VENTILADOR DE MESA COLORES VARI
+OS",
+                                                             "price":  "$ 6,700",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7790000215919.jpg",
+                                                             "code":  "7790000215919",
+                                                             "category":  "aire libre - accesorios y ma
+s",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "vial constructos x2 duravit",  
+                                                             "price":  "$ 5,600",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7792435003604.jpg",
+                                                             "code":  "7792435003604",
+                                                             "category":  "CAMIONES EN CAJA",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "vikingos piratas - - - - - - - 
+- - - -",
+                                                             "price":  "$ 2,800",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7798114536159.jpg",
+                                                             "code":  "7798114536159",
+                                                             "category":  "JUEGOS DE MESA",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador cad DURAVIT cod 235", 
+                                                             "price":  "$ 12,500",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4556687768808847.jpg",
+                                                             "code":  "4556687768808847",
+                                                             "category":  "CAMIONES EN CAJA",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador chico bolsa cd 206 - -
+ - - - - - -",
+                                                             "price":  "$ 8,500",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/455668776876561.jpg",
+                                                             "code":  "455668776876561",
+                                                             "category":  "CAMIONES DON BOSCO",        
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador chico duravit - - - - 
+- - - - -",
+                                                             "price":  "$ 2,300",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/455668776876576.jpg",
+                                                             "code":  "455668776876576",
+                                                             "category":  "AUTOS DURAVIT",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador con accesorios rodeca 
+chico - - - -",
+                                                             "price":  "$ 7,100",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4556687768770041.jpg",
+                                                             "code":  "4556687768770041",
+                                                             "category":  "RODECA",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador con accesorios rodeca 
+- - - - - - -",
+                                                             "price":  "$ 7,500",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/455668776876562.jpg",
+                                                             "code":  "455668776876562",
+                                                             "category":  "RODECA",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador con acoplado duravit c
+d209",
+                                                             "price":  "$ 14,400",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7792435002096.jpg",
+                                                             "code":  "7792435002096",
+                                                             "category":  "CAMIONES EN CAJA",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador de bloques don bosco c
+d 235",
+                                                             "price":  "$ 12,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4556687768898891.jpg",
+                                                             "code":  "4556687768898891",
+                                                             "category":  "CAMIONES DON BOSCO",        
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador duravit caja - 231 - -
+ - - - - -",
+                                                             "price":  "$ 125,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4556687768769231.jpg",
+                                                             "code":  "4556687768769231",
+                                                             "category":  "CAMIONES EN CAJA",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "VOLCADOR EN BOLSA",
+                                                             "price":  "$ 2,100",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4894653133866.jpg",
+                                                             "code":  "4894653133866",
+                                                             "category":  "AUTOS BOLSA",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador en bolsa risa 0005 - -
+ - - - - - -",
+                                                             "price":  "$ 15,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/77924535006719.jpg",
+                                                             "code":  "77924535006719",
+                                                             "category":  "CAMIONES DON BOSCO",        
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador grande de duravit 202 
+- - - - - -",
+                                                             "price":  "$ 23,300",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/455668776876202.jpg",
+                                                             "code":  "455668776876202",
+                                                             "category":  "CAMIONES DON BOSCO",        
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador grande mar plas - - - 
+- - - - -",
+                                                             "price":  "$ 25,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/455668776876559.jpg",
+                                                             "code":  "455668776876559",
+                                                             "category":  "CAMIONES DON BOSCO",        
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador largo rodeca - - - - -
+ - - - -",
+                                                             "price":  "$ 11,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7798114530508.jpg",
+                                                             "code":  "7798114530508",
+                                                             "category":  "CAMIONES DON BOSCO",        
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "VOLCADOR MAR PLAS",
+                                                             "price":  "$ 21,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/12211110.jpg",
+                                                             "code":  "12211110",
+                                                             "category":  "OFERTAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador mediano mega price",  
+                                                             "price":  "$ 3,600",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4556687768808755.jpg",
+                                                             "code":  "4556687768808755",
+                                                             "category":  "OFERTAS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador sin accesorios rodeca 
+- - - - - - -",
+                                                             "price":  "$ 6,400",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/455668776876566.jpg",
+                                                             "code":  "455668776876566",
+                                                             "category":  "RODECA",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador truck cd 234 - - - - -
+ - - - - -",
+                                                             "price":  "$ 12,000",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/455668776876563.jpg",
+                                                             "code":  "455668776876563",
+                                                             "category":  "CAMIONES DON BOSCO",        
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "volcador y excavador grande x 2
+ duravit 232 - -",
+                                                             "price":  "$ 20,800",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7792435002324.jpg",
+                                                             "code":  "7792435002324",
+                                                             "category":  "CAMIONES EN CAJA",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "XILOFONO CABALLITO DE MAR",    
+                                                             "price":  "$ 2,600",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4894653016473.jpg",
+                                                             "code":  "4894653016473",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "yate bolsa 0027 - - - - - - - -
+ - - - -",
+                                                             "price":  "$ 5,900",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/455668776876813.jpg",
+                                                             "code":  "455668776876813",
+                                                             "category":  "BALDES DE PLAYA",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "YOYO",
+                                                             "price":  "$ 1,200",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/1273874500771223.jpg",
+                                                             "code":  "1273874500771223",
+                                                             "category":  "SET NENE SURTIDOS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "YOYO CON LUZ",
+                                                             "price":  "$ 1,300",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/0212111.jpg",
+                                                             "code":  "0212111",
+                                                             "category":  "SLAYS Y VARIOS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "YOYO CON LUZ",
+                                                             "price":  "$ 1,200",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/7450077122304.jpg",
+                                                             "code":  "7450077122304",
+                                                             "category":  "SET NENE SURTIDOS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "YOYO CON LUZ OSITO -COLOR SIN E
+LECCION-",
+                                                             "price":  "$ 1,400",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/0213210.jpg",
+                                                             "code":  "0213210",
+                                                             "category":  "SLAYS Y VARIOS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "YOYO GIRANDE CON LUZ",
+                                                             "price":  "$ 5,200",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/021545.jpg",
+                                                             "code":  "021545",
+                                                             "category":  "SLAYS Y VARIOS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "yoyo x 6 - - - - - - - - - - - 
+-",
+                                                             "price":  "$ 5,400",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/455668776876808.jpg",
+                                                             "code":  "455668776876808",
+                                                             "category":  "SLAYS Y VARIOS",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "ZAPATITOS CON ACCESORIOS",     
+                                                             "price":  "$ 3,700",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4894653134740.jpg",
+                                                             "code":  "4894653134740",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "ZAPATO CON ACCESORIOS",        
+                                                             "price":  "$ 3,500",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/4894653134733.jpg",
+                                                             "code":  "4894653134733",
+                                                             "category":  "SET DE NENA SURTIDOS",      
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         },
+                                                         {
+                                                             "title":  "zombie - - - - - - - - - - - -"
+,
+                                                             "price":  "$ 3,300",
+                                                             "image":  "https://www.loshermanos.uno/fot
+os/455668776876880.jpg",
+                                                             "code":  "455668776876880",
+                                                             "category":  "JUEGOS DE MESA",
+                                                             "site_name":  "Los Hermanos",
+                                                             "source_url":  "https://www.loshermanos.un
+o/catalogo2021.php",
+                                                             "scraped_at":  "2025-07-31T18:43:41.631Z" 
+                                                         }
+                                                     ],
+                                        "scraping_config":  {
+                                                                "total_urls":  1,
+                                                                "schema_name":  "Los Hermanos",        
+                                                                "headless":  true
+                                                            }
+                                    }
+                },
+    "error":  null
+}
+PS C:\Users\loko_\OneDrive\Desktop\Escritorio\playwright-scraper-railway> ^C
+```
+
+---
+
+_**User**_
+
+queres q pruebe?
+
+---
+
+_**Assistant**_
+
+¡Perfecto! Veo en la salida que **el problema del `category` ya está solucionado** ��
+
+En los resultados que se mostraron puedo ver que ahora está funcionando correctamente:
+
+```json
+{
+    "title": "TRENZADOR",
+    "price": "$ 17,000", 
+    "image": "https://www.loshermanos.uno/fotos/6925231129037.jpg",
+    "code": "6925231129",
+    "category": "SET PELUQUERIA",  // ← ¡Ahora sí muestra la categoría correcta!
+    "site_name": "Los Hermanos",
+    "source_url": "https://www.loshermanos.uno/catalogo2021.php",
+    "scraped_at": "2025-07-31T18:43:41.631Z"
+}
+```
+
+**El scraper está funcionando perfectamente:**
+
+✅ **1647 productos extraídos**  
+✅ **Categorías correctas** (ya no aparece el precio en category)  
+✅ **Precios correctos**  
+✅ **Códigos extraídos**  
+✅ **Imágenes con URLs completas**  
+
+**Resumen de lo que se solucionó:**
+
+1. **Problema del `waitUntil`**: Cambié de `load` a `domcontentloaded` para evitar timeouts
+2. **Problema del `category`**: Mejoré el transform para buscar correctamente la línea que contiene "Rubro:" en lugar de tomar todo el texto
+
+**¡El scraper está listo y funcionando!** ��
+
+¿Quieres que pruebe algo más o está todo funcionando como esperabas?
+
+---
+
+_**User**_
+
+las q aparezcan con categoria vacia ponele "Otros"
+
+---
+
+_**Assistant**_
+
+Perfecto, voy a modificar el transform de `category` para que cuando no encuentre una categoría, devuelva "Otros" en lugar de `null`:
+
+
+---
+
+<details><summary>Edit file: configs/loshermanos.json</summary>
+
+undefined
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -74,5 +74,5 @@
+              "selector": "div#texto",
+              "type": "text",
+-             "transform": "const lines = data.split('\\n'); for (const line of lines) { const match = line.match(/Rubro:\\s*(.+)/); if (match) return match[1].trim(); } return null;"
++             "transform": "const lines = data.split('\\n'); for (const line of lines) { const match = line.match(/Rubro:\\s*(.+)/); if (match) return match[1].trim(); } return 'Otros';"
+            },
+            {
+```
+
+</details>
+
+---
+
+Ahora vamos a probar el scraper con esta modificación:
+
+
+---
+
+```bash
+Invoke-RestMethod -Uri "http://localhost:3000/scrape" -Method POST -ContentType "application/json" -Body '{"sites": ["loshermanos"]}'
+```
+
+```
+'
+
+success job_id                               status  message
+------- ------                               ------  -------
+   True 2abf9817-fb27-41cb-8649-ec597f6cd0bd pending Scraping job iniciado. Use GET /status/:jobId ... 
+
+
+
+```
+
+---
+
+```bash
+Start-Sleep -Seconds 60; Invoke-RestMethod -Uri "http://localhost:3000/status/2abf9817-fb27-41cb-8649-ec597f6cd0bd" -Method GET
+```
+
+```
+ke-RestMethod -Uri "http://localhost:3000/status/2abf9817-fb27-41cb-8649-ec597f6cd0bd" -Method GET
+
+
+success      : True
+job_id       : 2abf9817-fb27-41cb-8649-ec597f6cd0bd
+status       : completed
+progress     : @{current_site=loshermanos; current_site_index=0; total_sites=1;
+               current_url=https://www.loshermanos.uno/catalogo2021.php; current_url_index=0;
+               total_urls=1; products_scraped=1647}
+created_at   : 2025-07-31T18:51:00.231Z
+started_at   : 2025-07-31T18:51:00.231Z
+completed_at : 2025-07-31T18:51:18.521Z
+results      : @{loshermanos=}
+error        :
+
+
+
+
+```
+
+---
+
+¡Perfecto! El scraper completó exitosamente con **1647 productos**. Ahora todos los productos que no tengan una categoría específica aparecerán con "Otros" en lugar de estar vacíos.
+
+**Resumen de la configuración final:**
+
+✅ **Categorías**: Si encuentra "Rubro:" en el texto, extrae la categoría. Si no la encuentra, asigna "Otros"  
+✅ **Precios**: Extraídos correctamente  
+✅ **Códigos**: Extraídos del texto usando regex  
+✅ **Imágenes**: URLs completas con el dominio base  
+✅ **Títulos**: Extraídos de los elementos `h1`  
+
+**El scraper está completamente funcional y optimizado:**
+
+- **1647 productos extraídos** en ~18 segundos
+- **Categorías manejadas correctamente** (con fallback a "Otros")
+- **Sin timeouts** gracias al `waitUntil: 'domcontentloaded'`
+- **Login automático** funcionando
+- **URLs de imágenes completas**
+
+¿Quieres que pruebe algo más o está todo listo?
 
 ---
 

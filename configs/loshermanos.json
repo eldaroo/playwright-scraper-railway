@@ -73,7 +73,7 @@
             "name": "category",
             "selector": "div#texto",
             "type": "text",
-            "transform": "const match = data.match(/Rubro:\\s*([^\\n]+)/); return match ? match[1].trim() : null;"
+            "transform": "const lines = data.split('\\n'); for (const line of lines) { const match = line.match(/Rubro:\\s*(.+)/); if (match) return match[1].trim(); } return 'Otros';"
           },
           {
             "name": "source_url",
