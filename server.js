@@ -189,11 +189,12 @@ async function scrapeUrl(browser, url, siteConfig, context) {
     page = await context.newPage();
     await page.setViewportSize(siteConfig.crawler_params.defaultViewport);
     
-    // Bloquear recursos pesados para acelerar carga (pero permitir JS)
+    // Bloquear recursos pesados para acelerar carga (pero permitir JS y permitir imágenes para Casa Mami)
     await page.route('**/*', (route) => {
-      return ['image', 'stylesheet', 'font', 'media'].includes(route.request().resourceType())
-        ? route.abort()
-        : route.continue();
+      const resourceType = route.request().resourceType();
+      const shouldBlock = ['stylesheet', 'font', 'media'].includes(resourceType) || 
+                         (resourceType === 'image' && !siteConfig.site_name.toLowerCase().includes('casa mami'));
+      return shouldBlock ? route.abort() : route.continue();
     });
     
     let nextUrl = url;
@@ -232,6 +233,53 @@ async function scrapeUrl(browser, url, siteConfig, context) {
         console.log(`[SCRAPER] Error cargando ${nextUrl}: ${error.message}, terminando paginación`);
         nextUrl = null;
         continue;
+      }
+
+      // Ejecutar pre_actions si están definidas
+      if (siteConfig.pre_actions && Array.isArray(siteConfig.pre_actions)) {
+        console.log(`[SCRAPER] Ejecutando ${siteConfig.pre_actions.length} pre_actions...`);
+        for (const action of siteConfig.pre_actions) {
+          try {
+            switch (action.type) {
+              case 'waitForLoadState':
+                await page.waitForLoadState(action.state);
+                console.log(`[PRE_ACTION] waitForLoadState: ${action.state}`);
+                break;
+              case 'waitForSelector':
+                await page.waitForSelector(action.selector, { timeout: action.timeout || 5000 });
+                console.log(`[PRE_ACTION] waitForSelector: ${action.selector}`);
+                break;
+              case 'waitForTimeout':
+                await page.waitForTimeout(action.timeout || 1000);
+                console.log(`[PRE_ACTION] waitForTimeout: ${action.timeout || 1000}ms`);
+                break;
+              case 'scroll':
+                if (action.direction === 'down') {
+                  const amount = action.amount || 1;
+                  for (let i = 0; i < amount; i++) {
+                    await page.evaluate(() => {
+                      window.scrollBy(0, window.innerHeight);
+                    });
+                    await page.waitForTimeout(500);
+                  }
+                  console.log(`[PRE_ACTION] scroll down ${amount} times`);
+                }
+                break;
+              case 'evaluate':
+                await page.evaluate(action.script);
+                console.log(`[PRE_ACTION] evaluate: ${action.script.substring(0, 50)}...`);
+                break;
+              case 'screenshot':
+                await page.screenshot({ path: `screenshots/${action.path}` });
+                console.log(`[PRE_ACTION] screenshot: ${action.path}`);
+                break;
+              default:
+                console.log(`[PRE_ACTION] Tipo de acción desconocido: ${action.type}`);
+            }
+          } catch (actionError) {
+            console.log(`[PRE_ACTION] Error ejecutando ${action.type}: ${actionError.message}`);
+          }
+        }
       }
 
       const baseSel = siteConfig.extraction_config.params.schema.baseSelector;

@@ -147,7 +147,11 @@
     }, 
     "pre_actions": [
         { "type": "waitForLoadState", "state": "domcontentloaded" },
-        { "type": "waitForSelector", "selector": "div.product-small.col.has-hover.product", "timeout": 5000 }
+        { "type": "waitForSelector", "selector": "div.product-small.col.has-hover.product", "timeout": 10000 },
+        { "type": "scroll", "direction": "down", "amount": 10 },
+        { "type": "waitForTimeout", "timeout": 5000 },
+        { "type": "evaluate", "script": "window.scrollTo(0, 0);" },
+        { "type": "waitForTimeout", "timeout": 2000 }
     ],
     "post_actions": [],
     "extraction_config": {
@@ -174,7 +178,7 @@
               "selector": "div.box-image img",
               "type": "attribute",
               "attribute": "src",
-              "transform": "const val = data || element.getAttribute('data-src'); return val && !val.startsWith('data:image/svg+xml') ? val : null;"
+              "transform": "let val = data; const attrs = ['data-src', 'data-srcset', 'srcset', 'data-lazy-src', 'data-original', 'data-lazy-srcset']; for (const attr of attrs) { if (!val || val.includes('%3Csvg') || val.startsWith('data:image/svg+xml')) { val = element.getAttribute(attr); } } if (!val || val.includes('%3Csvg') || val.startsWith('data:image/svg+xml')) { const container = element.closest('.product-small') || element.closest('.col'); const imgs = container ? container.querySelectorAll('img') : []; for (const img of imgs) { for (const attr of ['src', ...attrs]) { const imgSrc = img.getAttribute(attr); if (imgSrc && !imgSrc.includes('%3Csvg') && !imgSrc.startsWith('data:image/svg+xml') && (imgSrc.includes('.jpg') || imgSrc.includes('.jpeg') || imgSrc.includes('.png') || imgSrc.includes('.webp'))) { val = imgSrc; break; } } if (val && !val.includes('%3Csvg')) break; } } if (val && val.includes(',')) { val = val.split(',').find(v => v.includes('.jpg') || v.includes('.jpeg') || v.includes('.png') || v.includes('.webp')) || val.split(',')[0]; val = val.trim().split(' ')[0]; } return (val && !val.includes('%3Csvg') && !val.startsWith('data:image/svg+xml')) ? val : null;"
             },
             {
               "name": "url",
@@ -213,8 +217,8 @@
       }
     },
     "cache_mode": "bypass",
-    "semaphore_count": 3,
-    "request_delay": 500,
+    "semaphore_count": 2,
+    "request_delay": 1000,
     "verbose": true
   }
   
