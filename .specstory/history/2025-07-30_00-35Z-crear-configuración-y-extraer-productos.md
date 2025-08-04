@@ -8956,3 +8956,23 @@ Ahora `casamami` debería obtener muchas más imágenes reales en lugar de los S
 
 ---
 
+_**User**_
+
+cuando scrapeo emax no estan viniendo los precios
+
+---
+
+_**Assistant**_
+
+Vamos a revisar la configuración de E-max para identificar por qué no están viniendo los precios:
+
+---
+
+Read file: configs/emax.json
+
+---
+
+
+
+---
+

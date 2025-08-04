@@ -1,0 +1,101 @@
+{
+  "site_name": "E-max Store Test",
+  "base_url": "https://e-max-store.com",
+  "use_predefined_urls": true,
+  "urls": [
+    "https://e-max-store.com/categoria-producto/adaptador/"
+  ],
+  "crawler_params": {
+    "headless": true,
+    "defaultViewport": { "width": 1280, "height": 800 },
+    "args": [
+      "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+    ]
+  },
+  "auth_config": {
+    "login_url": "https://e-max-store.com",
+    "login_button_selector": ".xoo-el-login-tgr",
+    "form_selectors": {
+      "username": "input[name='xoo-el-username']",
+      "password": "input[name='xoo-el-password']"
+    },
+    "submit_button": ".xoo-el-login-btn",
+    "credentials": {
+      "username": "darioegea@gmail.com",
+      "password": "Dariowinner_90"
+    },
+    "success_check": {
+      "selector": ".logged-in",
+      "timeout": 5000
+    }
+  },
+  "pre_actions": [
+    { "type": "waitForSelector", "selector": "ul.products li.product", "timeout": 15000 }
+  ],
+  "pagination": {
+    "selector": null,
+    "attribute": null,
+    "max_pages": 1
+  },
+  "extraction_config": {
+    "type": "json_css",
+    "params": {
+      "schema": {
+        "name": "E-max Store Test",
+        "baseSelector": "ul.products li.product",
+        "fields": [
+          {
+            "name": "title",
+            "selector": "h2.woocommerce-loop-product__title",
+            "type": "text"
+          },
+          {
+            "name": "price",
+            "selector": "span.price",
+            "type": "text",
+            "transform": "if (!data) return null; const cleanPrice = data.replace(/[^\\d,\\.$]/g, '').trim(); return cleanPrice || data;"
+          },
+          {
+            "name": "price_alt",
+            "selector": "span.price ins .amount, span.price > .amount, .price .woocommerce-Price-amount",
+            "type": "text",
+            "transform": "if (!data) return null; return data.replace(/[^\\d,\\.]/g, '').trim();"
+          },
+          {
+            "name": "image",
+            "selector": "img",
+            "type": "attribute",
+            "attribute": "src"
+          },
+          {
+            "name": "link",
+            "selector": "a.woocommerce-LoopProduct-link",
+            "type": "attribute",
+            "attribute": "href"
+          },
+          {
+            "name": "category",
+            "selector": ".elementor-divider__text",
+            "type": "text"
+          },
+          {
+            "name": "source_url",
+            "type": "url"
+          },
+          {
+            "name": "scraped_at",
+            "type": "timestamp"
+          },
+          {
+            "name": "site_name",
+            "type": "constant",
+            "value": "E-max Store Test"
+          }
+        ]
+      },
+      "verbose": true
+    }
+  },
+  "semaphore_count": 1,
+  "max_products": 5
+}
