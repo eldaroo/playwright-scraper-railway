@@ -80,10 +80,10 @@
           },
           {
             "name": "image",
-            "selector": "div.product-item-image-container img",
+            "selector": "div.js-product-container",
             "type": "attribute",
-            "attribute": "srcset",
-            "transform": "let selected = null; const toAbsolute = value => { if (!value) return null; const url = value.trim().split(' ')[0]; if (!url) return null; return url.startsWith('//') ? 'https:' + url : url; }; const srcset = data || element.getAttribute('srcset') || element.getAttribute('data-srcset'); if (srcset) { const entries = srcset.split(',').map(part => part.trim()).filter(Boolean); if (entries.length > 0) { const best = entries.reduce((acc, curr) => { const accWidth = parseInt(acc.match(/(\\\\d+)w$/)?.[1] || '0', 10); const currWidth = parseInt(curr.match(/(\\\\d+)w$/)?.[1] || '0', 10); return currWidth > accWidth ? curr : acc; }, entries[0]); selected = toAbsolute(best); } } if (!selected) { const fallback = element.getAttribute('src') || element.getAttribute('data-src'); selected = toAbsolute(fallback || ''); } return selected;"
+            "attribute": "data-variants",
+            "transform": "const toAbsolute = value => { if (!value) return null; const clean = value.trim(); if (!clean) return null; return clean.startsWith('//') ? 'https:' + clean : clean; }; let selected = null; if (data) { try { const variants = JSON.parse(data); if (Array.isArray(variants) && variants.length > 0) { selected = toAbsolute(variants[0].image_url || variants[0].image); } } catch (err) { selected = null; } } if (!selected && element) { const img = element.closest('.item').querySelector('div.product-item-image-container img'); if (img) { const srcset = img.getAttribute('srcset') || img.dataset.srcset; if (srcset) { const entries = srcset.split(',').map(part => part.trim()).filter(Boolean); if (entries.length > 0) { const best = entries.reduce((acc, curr) => { const accWidth = parseInt(acc.match(/(\\\\d+)w$/)?.[1] || '0', 10); const currWidth = parseInt(curr.match(/(\\\\d+)w$/)?.[1] || '0', 10); return currWidth > accWidth ? curr : acc; }, entries[0]); selected = toAbsolute(best.split(' ')[0]); } } if (!selected) { selected = toAbsolute(img.getAttribute('src') || img.dataset.src); } } } return selected;"
           },
           {
             "name": "url",
