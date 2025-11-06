@@ -1,0 +1,128 @@
+{
+  "site_name": "Mayorista Rising",
+  "base_url": "https://www.mayoristarising.com.ar",
+  "use_predefined_urls": true,
+  "urls": [
+    "https://www.mayoristarising.com.ar/maquillaje1/sombras2/",
+    "https://www.mayoristarising.com.ar/maquillaje1/labiales/",
+    "https://www.mayoristarising.com.ar/maquillaje1/delineadores-y-mascaras/",
+    "https://www.mayoristarising.com.ar/maquillaje1/bases-y-correctores/",
+    "https://www.mayoristarising.com.ar/maquillaje1/corrector-iluminador-y-contorno/",
+    "https://www.mayoristarising.com.ar/maquillaje1/primer-fijador-y-desmaquillante/",
+    "https://www.mayoristarising.com.ar/maquillaje1/brochas-y-pinceles/",
+    "https://www.mayoristarising.com.ar/maquillaje1/perfumes1/",
+    "https://www.mayoristarising.com.ar/maquillaje1/cremas/",
+    "https://www.mayoristarising.com.ar/mascarillas-y-accesorios/",
+    "https://www.mayoristarising.com.ar/unas-y-pestanas/esmaltes/",
+    "https://www.mayoristarising.com.ar/unas-y-pestanas/unas-y-accesorios/",
+    "https://www.mayoristarising.com.ar/unas-y-pestanas/insumos-para-unas/",
+    "https://www.mayoristarising.com.ar/unas-y-pestanas/pestanas-y-accesorios/",
+    "https://www.mayoristarising.com.ar/accesorios/invierno/",
+    "https://www.mayoristarising.com.ar/accesorios/accesorios-para-el-cabello/",
+    "https://www.mayoristarising.com.ar/accesorios/bijouterie/",
+    "https://www.mayoristarising.com.ar/accesorios/llaveros/",
+    "https://www.mayoristarising.com.ar/accesorios/accesorios-varios/",
+    "https://www.mayoristarising.com.ar/regaleria-y-bazar/juguetes/",
+    "https://www.mayoristarising.com.ar/regaleria-y-bazar/mascotas/",
+    "https://www.mayoristarising.com.ar/regaleria-y-bazar/herramientas/",
+    "https://www.mayoristarising.com.ar/regaleria-y-bazar/bazar/",
+    "https://www.mayoristarising.com.ar/regaleria-y-bazar/regaleria/",
+    "https://www.mayoristarising.com.ar/ofertas/"
+  ],
+  "crawler_params": {
+    "headless": true,
+    "defaultViewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "args": [
+      "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+      "--disable-extensions",
+      "--disable-dev-shm-usage",
+      "--no-sandbox",
+      "--disable-gpu"
+    ]
+  },
+  "pre_actions": [
+    { "type": "waitForLoadState", "state": "domcontentloaded" },
+    { "type": "waitForLoadState", "state": "networkidle" },
+    { "type": "waitForSelector", "selector": "div.js-item-product", "timeout": 20000 },
+    {
+      "type": "evaluate",
+      "script": "(async () => { const sleep = ms => new Promise(resolve => setTimeout(resolve, ms)); const productSelector = '.js-item-product'; let lastCount = document.querySelectorAll(productSelector).length; for (let i = 0; i < 40; i++) { const btn = document.querySelector('.js-load-more'); if (!btn || btn.offsetParent === null || btn.hasAttribute('disabled') || btn.classList.contains('btn-loading') || getComputedStyle(btn).display === 'none') break; btn.scrollIntoView({ behavior: 'smooth', block: 'center' }); btn.click(); let updated = false; for (let j = 0; j < 20; j++) { await sleep(500); const currentCount = document.querySelectorAll(productSelector).length; if (currentCount > lastCount) { lastCount = currentCount; updated = true; break; } if (!btn.classList.contains('btn-loading')) break; } if (!updated) await sleep(1500); } await sleep(500); })()"
+    },
+    { "type": "waitForTimeout", "timeout": 2000 },
+    {
+      "type": "evaluate",
+      "script": "document.querySelectorAll('.js-item-product img').forEach(img => { if (img.dataset.srcset && (!img.getAttribute('srcset') || img.getAttribute('srcset').includes('data:image'))) { img.setAttribute('srcset', img.dataset.srcset); } if (img.dataset.src && (!img.getAttribute('src') || img.getAttribute('src').includes('data:image'))) { img.setAttribute('src', img.dataset.src); } });"
+    },
+    { "type": "waitForTimeout", "timeout": 1000 }
+  ],
+  "post_actions": [],
+  "extraction_config": {
+    "type": "json_css",
+    "params": {
+      "schema": {
+        "name": "Mayorista Rising",
+        "baseSelector": "div.js-item-product",
+        "fields": [
+          {
+            "name": "title",
+            "selector": "div.js-item-name",
+            "type": "text",
+            "transform": "return data ? data.trim() : null;"
+          },
+          {
+            "name": "price",
+            "selector": "span.js-price-display",
+            "type": "text",
+            "transform": "return data ? data.replace(/[^\\d.,]/g, '').replace(/(\\.00|,00)$/, '').trim() : null;"
+          },
+          {
+            "name": "image",
+            "selector": "div.product-item-image-container img",
+            "type": "attribute",
+            "attribute": "srcset",
+            "transform": "let selected = null; const toAbsolute = value => { if (!value) return null; const url = value.trim().split(' ')[0]; if (!url) return null; return url.startsWith('//') ? 'https:' + url : url; }; const srcset = data || element.getAttribute('srcset') || element.getAttribute('data-srcset'); if (srcset) { const entries = srcset.split(',').map(part => part.trim()).filter(Boolean); if (entries.length > 0) { const best = entries.reduce((acc, curr) => { const accWidth = parseInt(acc.match(/(\\\\d+)w$/)?.[1] || '0', 10); const currWidth = parseInt(curr.match(/(\\\\d+)w$/)?.[1] || '0', 10); return currWidth > accWidth ? curr : acc; }, entries[0]); selected = toAbsolute(best); } } if (!selected) { const fallback = element.getAttribute('src') || element.getAttribute('data-src'); selected = toAbsolute(fallback || ''); } return selected;"
+          },
+          {
+            "name": "url",
+            "selector": "div.item-description a.item-link",
+            "type": "attribute",
+            "attribute": "href"
+          },
+          {
+            "name": "status",
+            "selector": "div.js-stock-label",
+            "type": "text",
+            "transform": "const style = element ? (element.getAttribute('style') || '') : ''; return style.includes('display:none') ? 'in_stock' : 'out_of_stock';"
+          },
+          {
+            "name": "category",
+            "type": "url_extract",
+            "pattern": "https://www\\.mayoristarising\\.com\\.ar/([^?#]+)",
+            "transform": "if (!data) return null; const parts = data.split('/').filter(Boolean); let segment = parts.pop() || ''; segment = decodeURIComponent(segment).replace(/[-_]/g, ' ').replace(/\\d+$/, '').trim(); if (!segment && parts.length) { segment = decodeURIComponent(parts.pop()).replace(/[-_]/g, ' ').trim(); } return segment ? segment.replace(/\\s+/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : null;"
+          },
+          {
+            "name": "source_url",
+            "type": "url"
+          },
+          {
+            "name": "scraped_at",
+            "type": "timestamp"
+          },
+          {
+            "name": "site_name",
+            "type": "constant",
+            "value": "Mayorista Rising"
+          }
+        ]
+      },
+      "verbose": true
+    }
+  },
+  "cache_mode": "bypass",
+  "semaphore_count": 2,
+  "request_delay": 1000,
+  "verbose": true
+}

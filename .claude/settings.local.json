@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/C:\\Users\\loko_\\OneDrive\\Desktop\\Escritorio\\playwright-scraper-railway/**)",
+      "Read(/C:\\Users\\loko_\\OneDrive\\Desktop\\Escritorio\\playwright-scraper-railway/**)",
+      "Bash(npm install)",
+      "Bash(node server.js)",
+      "Bash(PORT=3001 node server.js)",
+      "WebFetch(domain:casamami.com.ar)",
+      "Bash(node:*)",
+      "Bash(PORT=3001 node server.js configs/casamami3.json)",
+      "Bash(PORT=3002 node server.js configs/casamami3.json)",
+      "Bash(curl:*)",
+      "Bash(taskkill:*)",
+      "Bash(wmic:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
