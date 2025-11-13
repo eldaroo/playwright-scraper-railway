@@ -49,14 +49,14 @@
     { "type": "waitForSelector", "selector": "div.js-item-product", "timeout": 20000 },
     {
       "type": "evaluate",
-      "script": "(async () => { const sleep = ms => new Promise(resolve => setTimeout(resolve, ms)); const productSelector = '.js-item-product'; let lastCount = document.querySelectorAll(productSelector).length; for (let i = 0; i < 40; i++) { const btn = document.querySelector('.js-load-more'); if (!btn || btn.offsetParent === null || btn.hasAttribute('disabled') || btn.classList.contains('btn-loading') || getComputedStyle(btn).display === 'none') break; btn.scrollIntoView({ behavior: 'smooth', block: 'center' }); btn.click(); let updated = false; for (let j = 0; j < 20; j++) { await sleep(500); const currentCount = document.querySelectorAll(productSelector).length; if (currentCount > lastCount) { lastCount = currentCount; updated = true; break; } if (!btn.classList.contains('btn-loading')) break; } if (!updated) await sleep(1500); } await sleep(500); })()"
+      "script": "(async () => { const sleep = ms => new Promise(resolve => setTimeout(resolve, ms)); const selectors = { product: '.js-item-product', loadMore: '.js-load-more' }; const getButton = () => document.querySelector(selectors.loadMore); const start = Date.now(); const maxRuntime = 240000; const maxIdleRounds = 60; let idleRounds = 0; let lastCount = document.querySelectorAll(selectors.product).length; const log = (...args) => console.log('[MR-Loader]', ...args); const isVisible = el => { if (!el) return false; const style = window.getComputedStyle(el); return el.offsetParent !== null && style.display !== 'none' && style.visibility !== 'hidden'; }; log('start', lastCount, 'products'); while (Date.now() - start < maxRuntime && idleRounds < maxIdleRounds) { window.scrollBy(0, window.innerHeight * 0.8); window.scrollTo(0, document.body.scrollHeight); await sleep(900); const btn = getButton(); if (isVisible(btn) && !btn.hasAttribute('disabled')) { btn.scrollIntoView({ behavior: 'smooth', block: 'center' }); btn.click(); let waited = 0; while (waited < 20000) { await sleep(500); waited += 500; const current = document.querySelectorAll(selectors.product).length; if (current > lastCount) { lastCount = current; idleRounds = 0; log('loaded via button', current); break; } const loaderBtn = getButton(); if (!loaderBtn || !loaderBtn.classList.contains('btn-loading')) { break; } } } const currentCount = document.querySelectorAll(selectors.product).length; if (currentCount > lastCount) { lastCount = currentCount; idleRounds = 0; log('loaded via scroll', currentCount); } else { idleRounds++; } await sleep(700); } window.scrollTo(0, document.body.scrollHeight); await sleep(2000); log('finished with', document.querySelectorAll(selectors.product).length, 'products after', Math.round((Date.now() - start) / 1000), 's'); })()"
     },
-    { "type": "waitForTimeout", "timeout": 2000 },
+    { "type": "waitForTimeout", "timeout": 4000 },
     {
       "type": "evaluate",
       "script": "document.querySelectorAll('.js-item-product img').forEach(img => { if (img.dataset.srcset && (!img.getAttribute('srcset') || img.getAttribute('srcset').includes('data:image'))) { img.setAttribute('srcset', img.dataset.srcset); } if (img.dataset.src && (!img.getAttribute('src') || img.getAttribute('src').includes('data:image'))) { img.setAttribute('src', img.dataset.src); } });"
     },
-    { "type": "waitForTimeout", "timeout": 1000 }
+    { "type": "waitForTimeout", "timeout": 2000 }
   ],
   "post_actions": [],
   "extraction_config": {
