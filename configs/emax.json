@@ -27,7 +27,10 @@
   },
   "crawler_params": {
     "headless": true,
-    "defaultViewport": { "width": 1280, "height": 800 },
+    "defaultViewport": {
+      "width": 1280,
+      "height": 800
+    },
     "args": [
       "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
     ]
@@ -50,7 +53,11 @@
     }
   },
   "pre_actions": [
-    { "type": "waitForSelector", "selector": "ul.products li.product", "timeout": 15000 }
+    {
+      "type": "waitForSelector",
+      "selector": "ul.products li.product",
+      "timeout": 15000
+    }
   ],
   "extraction_config": {
     "type": "json_css",
@@ -74,7 +81,8 @@
             "name": "image",
             "selector": "img",
             "type": "attribute",
-            "attribute": "src"
+            "attribute": "src",
+            "transform": "const srcset = element.getAttribute('srcset'); let imageUrl = data; if (srcset) { const parts = srcset.split(','); const lastPart = parts[parts.length - 1].trim(); imageUrl = lastPart.split(' ')[0]; } return imageUrl ? imageUrl.replace(/-[0-9]+x[0-9]+(\\.[a-z]+)$/i, '$1') : data;"
           },
           {
             "name": "link",
@@ -110,4 +118,4 @@
     }
   },
   "semaphore_count": 2
-} 
+}

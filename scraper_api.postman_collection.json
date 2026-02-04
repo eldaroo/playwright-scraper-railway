@@ -1,0 +1,134 @@
+{
+    "info": {
+        "_postman_id": "b7e4a5d1-1234-4567-890a-bcdef1234567",
+        "name": "Playwright Scraper API",
+        "description": "API for managing web scraping jobs using Playwright.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Scrape (Async)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"sites\": [\"emax\"]\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/scrape",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "scrape"
+                    ]
+                },
+                "description": "Starts an asynchronous scraping job. Returns a jobId."
+            },
+            "response": []
+        },
+        {
+            "name": "Scrape Sync (Emax Test)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"sites\": [\"emax-test\"]\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/scrape-sync",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "scrape-sync"
+                    ]
+                },
+                "description": "Starts a synchronous scraping job. Waits for completion before responding."
+            },
+            "response": []
+        },
+        {
+            "name": "Job Status",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/status/:jobId",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "status",
+                        ":jobId"
+                    ],
+                    "variable": [
+                        {
+                            "key": "jobId",
+                            "value": "YOUR_JOB_ID_HERE"
+                        }
+                    ]
+                },
+                "description": "Gets the current status and results of a specific scraping job."
+            },
+            "response": []
+        },
+        {
+            "name": "List All Jobs",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/jobs",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "jobs"
+                    ]
+                },
+                "description": "Lists all scraping jobs stored in memory."
+            },
+            "response": []
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000",
+            "type": "string"
+        }
+    ]
+}
