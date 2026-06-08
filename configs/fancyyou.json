@@ -1,30 +1,57 @@
 {
     "site_name": "FancyYou",
     "base_url": "https://fancyyou.com.ar",
-    "use_predefined_urls": false,
-    "categories_config": {
-      "selector": "a[href*='/categoria/']",
-      "attribute": "href",
-      "base_path": "/categoria/",
-      "exclude_patterns": [
-        "/carrito",
-        "/checkout",
-        "/my-account",
-        "/account",
-        "/contacto",
-        "/información",
-        "/ubicación",
-        "/ofertas",
-        "/nosotros",
-        "/politicas",
-        "/terminos",
-        "/cuenta",
-        "/login",
-        "/register",
-        "/password",
-        "/search"
-      ]
-    },
+    "use_predefined_urls": true,
+    "_comment": "2026-06-08: FancyYou migrated off Empretienda onto WooCommerce/WordPress (Elementor archive). Old selectors (div.product-list__item, .ek-img, /categoria/, /images/product_image/) are dead and produced 404 image URLs. Rewritten against the current Elementor WooCommerce DOM: card=div.product, title=h2.woocommerce-loop-product__title, price=span.price, image=img.attachment-woocommerce_thumbnail srcset (wp-content), pagination=a.next.page-numbers, categories=/product-category/.",
+    "urls": [
+      "https://fancyyou.com.ar/product-category/maquillaje/",
+      "https://fancyyou.com.ar/product-category/maquillaje/labios/",
+      "https://fancyyou.com.ar/product-category/maquillaje/ojos/",
+      "https://fancyyou.com.ar/product-category/maquillaje/rostro/",
+      "https://fancyyou.com.ar/product-category/cabello/",
+      "https://fancyyou.com.ar/product-category/cabello/accesorios-cabello/",
+      "https://fancyyou.com.ar/product-category/cabello/complementos-cabello/",
+      "https://fancyyou.com.ar/product-category/cabello/tratamiento-capilar/",
+      "https://fancyyou.com.ar/product-category/complementos-de-belleza/",
+      "https://fancyyou.com.ar/product-category/complementos-de-belleza/aplicadores/",
+      "https://fancyyou.com.ar/product-category/complementos-de-belleza/cejas-pestanas/",
+      "https://fancyyou.com.ar/product-category/complementos-de-belleza/cuidado-personal/",
+      "https://fancyyou.com.ar/product-category/complementos-de-belleza/espejos-organizadores/",
+      "https://fancyyou.com.ar/product-category/skin-care/",
+      "https://fancyyou.com.ar/product-category/skin-care/corporal/",
+      "https://fancyyou.com.ar/product-category/skin-care/facial/",
+      "https://fancyyou.com.ar/product-category/skin-care/manos/",
+      "https://fancyyou.com.ar/product-category/perfumeria/",
+      "https://fancyyou.com.ar/product-category/unas/",
+      "https://fancyyou.com.ar/product-category/unas/cabinas-tornos/",
+      "https://fancyyou.com.ar/product-category/unas/complementos/",
+      "https://fancyyou.com.ar/product-category/unas/construccion-preparacion/",
+      "https://fancyyou.com.ar/product-category/unas/decoracion-adhesivos/",
+      "https://fancyyou.com.ar/product-category/unas/esmaltes/",
+      "https://fancyyou.com.ar/product-category/unas/removedores/",
+      "https://fancyyou.com.ar/product-category/unas/unas-postizas/",
+      "https://fancyyou.com.ar/product-category/accesorios/lentes/",
+      "https://fancyyou.com.ar/product-category/accesorios/llaveros/",
+      "https://fancyyou.com.ar/product-category/accesorios/porta-sube/",
+      "https://fancyyou.com.ar/product-category/bazar/",
+      "https://fancyyou.com.ar/product-category/bazar/botellas-termos/",
+      "https://fancyyou.com.ar/product-category/bazar/hogar-utilidades/",
+      "https://fancyyou.com.ar/product-category/bazar/lamparas-luces/",
+      "https://fancyyou.com.ar/product-category/bazar/libreria/",
+      "https://fancyyou.com.ar/product-category/bazar/mates/",
+      "https://fancyyou.com.ar/product-category/bazar/vasos-tazas/",
+      "https://fancyyou.com.ar/product-category/indumentaria/",
+      "https://fancyyou.com.ar/product-category/indumentaria/bodys/",
+      "https://fancyyou.com.ar/product-category/indumentaria/guantes/",
+      "https://fancyyou.com.ar/product-category/indumentaria/invierno/",
+      "https://fancyyou.com.ar/product-category/indumentaria/medias/",
+      "https://fancyyou.com.ar/product-category/indumentaria/pezoneras/",
+      "https://fancyyou.com.ar/product-category/marroquineria/",
+      "https://fancyyou.com.ar/product-category/marroquineria/billeteras/",
+      "https://fancyyou.com.ar/product-category/marroquineria/bolsos-carteras/",
+      "https://fancyyou.com.ar/product-category/marroquineria/mochilas/",
+      "https://fancyyou.com.ar/product-category/marroquineria/porta-cosmeticos/"
+    ],
     "crawler_params": {
       "headless": true,
       "defaultViewport": {
@@ -46,85 +73,66 @@
       ]
     },
     "pagination": {
-      "selector": "a.next.page-number",
+      "selector": "a.next.page-numbers",
       "attribute": "href",
       "max_pages": 100
     },
     "pre_actions": [
       { "type": "waitForLoadState", "state": "domcontentloaded" },
-      { "type": "waitForLoadState", "state": "networkidle" },
-      { "type": "waitForSelector", "selector": "div.product-list__item", "timeout": 30000 }
+      { "type": "waitForSelector", "selector": "div.product", "timeout": 30000 },
+      { "type": "scroll", "direction": "down", "amount": 10 },
+      { "type": "waitForTimeout", "timeout": 3000 },
+      { "type": "evaluate", "script": "(() => { const imgs = Array.from(document.querySelectorAll('img')); imgs.forEach(img => { const ds = img.getAttribute('data-srcset') || img.getAttribute('data-lazy-srcset'); if (ds && (!img.getAttribute('srcset') || img.getAttribute('srcset').startsWith('data:'))) { img.setAttribute('srcset', ds); } const s = img.getAttribute('data-src') || img.getAttribute('data-lazy-src'); const cur = img.getAttribute('src'); if (s && (!cur || cur.startsWith('data:') || cur === '')) { img.setAttribute('src', s); } }); })();" },
+      { "type": "waitForTimeout", "timeout": 1000 },
+      { "type": "evaluate", "script": "window.scrollTo(0, 0);" },
+      { "type": "waitForTimeout", "timeout": 1500 }
     ],
+    "post_actions": [],
     "extraction_config": {
       "type": "json_css",
       "params": {
         "schema": {
           "name": "FancyYou",
-          "baseSelector": "div.product-list__item",
+          "baseSelector": "div.product.type-product",
           "fields": [
             {
               "name": "title",
-              "selector": ".single-product--caption h3 a",
+              "selector": "h2.woocommerce-loop-product__title",
               "type": "text",
-              "transform": "return data.trim();"
-            },
-            {
-              "name": "sku",
-              "selector": "small.sku.text-muted",
-              "type": "text",
-              "transform": "return data.replace('SKU ', '');"
+              "transform": "return data ? data.trim() : null;"
             },
             {
               "name": "price",
               "selector": "span.price",
               "type": "text",
-              "transform": "return data.replace(/[^\\d,\\.]/g, '').trim().replace(/(\\.00|,00)$/, '');"
+              "transform": "if (!data) return null; const m = String(data).match(/[\\d\\.]+/g); if (!m || !m.length) return null; return m[m.length - 1].replace(/\\./g, '');"
             },
             {
               "name": "image_primary",
-              "selector": ".aspect-ratio-image-product .ek-img:first-child img",
+              "selector": "img.attachment-woocommerce_thumbnail",
               "type": "attribute",
-              "attribute": "src",
-              "transform": "return data.startsWith('/') ? 'https://fancyyou.com.ar' + data : data;"
-            },
-            {
-              "name": "image_secondary",
-              "selector": ".aspect-ratio-image-product .image-backward img",
-              "type": "attribute",
-              "attribute": "src",
-              "transform": "return data.startsWith('/') ? 'https://fancyyou.com.ar' + data : data;"
+              "attribute": "srcset",
+              "transform": "const toAbsolute = url => { if (!url) return null; const trimmed = url.trim(); if (!trimmed) return null; if (/^https?:/i.test(trimmed)) return trimmed; if (trimmed.startsWith('//')) return 'https:' + trimmed; if (trimmed.startsWith('/')) return 'https://fancyyou.com.ar' + trimmed; return trimmed; }; const entryValue = entry => { if (!entry) return 0; const widthMatch = entry.match(/(\\d+)\\s*w/); if (widthMatch) return parseInt(widthMatch[1], 10); const densityMatch = entry.match(/(\\d+(?:\\.\\d+)?)\\s*x/); if (densityMatch) return parseFloat(densityMatch[1]) * 1000; return 0; }; const pickFromSrcset = raw => { const entries = raw.split(',').map(part => part.trim()).filter(Boolean); if (!entries.length) return null; const best = entries.reduce((winner, current) => entryValue(current) > entryValue(winner) ? current : winner); return toAbsolute(best.split(' ')[0]); }; const firstAvailable = sources => { for (const source of sources) { if (source && source.trim && source.trim()) return source.trim(); } return null; }; const attr = name => element ? element.getAttribute(name) : null; const datasetVal = name => element && element.dataset ? element.dataset[name] : null; let source = data && data.trim ? data.trim() : null; if (!source) { source = firstAvailable([attr('data-srcset'), attr('data-lazy-srcset'), datasetVal('srcset'), datasetVal('lazySrcset')]); } if (!source) { source = firstAvailable([attr('srcset')]); } if (!source) { source = firstAvailable([attr('src'), attr('data-src'), attr('data-lazy-src'), datasetVal('src'), datasetVal('lazySrc')]); } let result = null; if (source) { result = source.includes(',') ? pickFromSrcset(source) : toAbsolute(source.split(' ')[0]); } return result && !result.startsWith('data:image') && !result.includes('%3Csvg') ? result : null;"
             },
             {
               "name": "url",
-              "selector": "a.single-product__more-info",
+              "selector": "a[href*='/product/']",
               "type": "attribute",
-              "attribute": "href"
+              "attribute": "href",
+              "transform": "if (!data) return null; return data.startsWith('/') ? 'https://fancyyou.com.ar' + data : data.split('?')[0];"
             },
             {
               "name": "category",
-              "selector": "div.single-product",
-              "type": "attribute",
-              "attribute": "data-mkt-item-list-name",
-              "transform": "return data ? data.replace('Catálogo | Category: ', '').replace('Catálogo | Texto: ', '').trim() : '';"
+              "type": "url_extract",
+              "pattern": "product-category/([^/]+)",
+              "transform": "return data ? data.replace(/-/g, ' ').toUpperCase() : null;"
             },
             {
               "name": "status",
-              "selector": "button.btn.btn-block.ek-btn-primary",
-              "type": "text",
-              "transform": "return data && data.includes('Comprar') ? 'in_stock' : 'out_of_stock';"
-            },
-            {
-              "name": "source_url",
-              "type": "url"
-            },
-            {
-              "name": "scraped_at",
-              "type": "timestamp"
-            },
-            {
-              "name": "site_name",
-              "type": "constant",
-              "value": "FancyYou"
+              "selector": "a[href*='add-to-cart'], a.add_to_cart_button, a.product_type_simple",
+              "type": "attribute",
+              "attribute": "href",
+              "transform": "return data ? 'in_stock' : 'out_of_stock';"
             }
           ]
         },
@@ -133,6 +141,6 @@
     },
     "cache_mode": "bypass",
     "semaphore_count": 2,
+    "request_delay": 1000,
     "verbose": true
   }
-  
